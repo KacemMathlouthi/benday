@@ -138,6 +138,7 @@ wordmark, an opaque no-alpha tile, and a soft-gradient blob.
 
 ## Links
 
+- Playground & docs — https://benday.kacemmathlouthi.dev
 - Repository — https://github.com/KacemMathlouthi/benday
 - Issues — https://github.com/KacemMathlouthi/benday/issues
 
