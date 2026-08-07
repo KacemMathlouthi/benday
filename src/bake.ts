@@ -1,0 +1,443 @@
+import type { BakeOptions, Dot, DotMap, ResolvedBakeOptions } from './types';
+
+export const DEFAULT_BAKE: Omit<ResolvedBakeOptions, 'workingSize'> = {
+  grid: 24,
+  threshold: 0.18,
+  gamma: 1,
+  maskMode: 'auto',
+  invert: false,
+  dilate: 0,
+  trim: true,
+};
+
+export function resolveBakeOptions(options: BakeOptions = {}): ResolvedBakeOptions {
+  const merged = { ...DEFAULT_BAKE, ...stripUndefined(options) };
+  const workingSize =
+    options.workingSize ?? clamp(Math.round(merged.grid * 16), 192, 768);
+  return { ...merged, workingSize };
+}
+
+function stripUndefined<T extends object>(o: T): Partial<T> {
+  const out: Partial<T> = {};
+  for (const k of Object.keys(o) as Array<keyof T>) {
+    if (o[k] !== undefined) out[k] = o[k];
+  }
+  return out;
+}
+
+const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
+/* ------------------------------------------------------------------ *
+ * Image loading
+ * ------------------------------------------------------------------ */
+
+export type BakeSource = string | Blob | HTMLImageElement | ImageBitmap;
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`benday: failed to load image "${src}"`));
+    img.src = src;
+  });
+}
+
+/**
+ * Rasterize the source at `workingSize` (longest side) into ImageData.
+ *
+ * SVGs are drawn straight at the target size — the vector rasterizes cleanly
+ * at whatever scale, so there is no need for the intermediate 4096px pass a
+ * texture-based pipeline would want.
+ */
+async function rasterize(
+  source: BakeSource,
+  workingSize: number
+): Promise<{ data: ImageData; width: number; height: number }> {
+  let el: CanvasImageSource;
+  let iw = 0;
+  let ih = 0;
+  let revoke: string | undefined;
+
+  try {
+    if (typeof source === 'string') {
+      const img = await loadImage(source);
+      el = img;
+      iw = img.naturalWidth || img.width;
+      ih = img.naturalHeight || img.height;
+    } else if (typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap) {
+      el = source;
+      iw = source.width;
+      ih = source.height;
+    } else if (source instanceof Blob) {
+      revoke = URL.createObjectURL(source);
+      const img = await loadImage(revoke);
+      el = img;
+      iw = img.naturalWidth || img.width;
+      ih = img.naturalHeight || img.height;
+    } else {
+      const img = source as HTMLImageElement;
+      el = img;
+      iw = img.naturalWidth || img.width;
+      ih = img.naturalHeight || img.height;
+    }
+
+    // SVGs with only a viewBox report 0×0 in some browsers.
+    if (!iw || !ih) {
+      iw = 1024;
+      ih = 1024;
+    }
+
+    const scale = workingSize / Math.max(iw, ih);
+    const width = Math.max(1, Math.round(iw * scale));
+    const height = Math.max(1, Math.round(ih * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) throw new Error('benday: could not acquire a 2D context');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(el, 0, 0, width, height);
+
+    let data: ImageData;
+    try {
+      data = ctx.getImageData(0, 0, width, height);
+    } catch {
+      throw new Error(
+        'benday: the image tainted the canvas (cross-origin without CORS headers)'
+      );
+    }
+    return { data, width, height };
+  } finally {
+    if (revoke) URL.revokeObjectURL(revoke);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Mask building
+ * ------------------------------------------------------------------ */
+
+const luma = (r: number, g: number, b: number) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+
+function hasAlpha(px: Uint8ClampedArray): boolean {
+  // A handful of soft edge pixels is enough; a fully opaque photo has none.
+  let soft = 0;
+  for (let i = 3; i < px.length; i += 4) {
+    if (px[i] < 250) {
+      soft++;
+      if (soft > 8) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Continuous ink coverage per pixel, 0 = background, 1 = solid ink.
+ *
+ * Alpha mode is the easy case. Luma mode is what makes JPEGs and flattened
+ * PNGs work: sample the four corners for the background level, then measure
+ * how far each pixel departs from it.
+ */
+function buildCoverage(
+  img: ImageData,
+  width: number,
+  height: number,
+  mode: 'alpha' | 'luma',
+  invert: boolean
+): Float32Array {
+  const px = img.data;
+  const cov = new Float32Array(width * height);
+
+  if (mode === 'alpha') {
+    for (let i = 0, p = 0; p < cov.length; i += 4, p++) cov[p] = px[i + 3] / 255;
+    return cov;
+  }
+
+  const corners = [
+    0,
+    (width - 1) * 4,
+    (height - 1) * width * 4,
+    ((height - 1) * width + width - 1) * 4,
+  ];
+  const cornerLuma = corners.map((i) => luma(px[i], px[i + 1], px[i + 2])).sort((a, b) => a - b);
+  let bg = (cornerLuma[1] + cornerLuma[2]) / 2; // median of four
+  let bgIsLight = bg > 0.5;
+  if (invert) bgIsLight = !bgIsLight;
+  // Guard against a background that sits mid-grey, which would leave no headroom.
+  const span = Math.max(0.12, bgIsLight ? bg : 1 - bg);
+  if (!bgIsLight) bg = Math.min(bg, 1 - span);
+
+  for (let i = 0, p = 0; p < cov.length; i += 4, p++) {
+    const l = luma(px[i], px[i + 1], px[i + 2]);
+    const ink = bgIsLight ? bg - l : l - bg;
+    // Transparent regions in a luma-mode image still read as background.
+    cov[p] = clamp01(ink / span) * (px[i + 3] / 255);
+  }
+  return cov;
+}
+
+/** Separable box dilation — grows the mask to rescue hairline strokes. */
+function dilateCoverage(cov: Float32Array, width: number, height: number, r: number): Float32Array {
+  if (r <= 0) return cov;
+  const radius = Math.round(r);
+  const tmp = new Float32Array(cov.length);
+  const out = new Float32Array(cov.length);
+
+  for (let y = 0; y < height; y++) {
+    const row = y * width;
+    for (let x = 0; x < width; x++) {
+      let m = 0;
+      const lo = Math.max(0, x - radius);
+      const hi = Math.min(width - 1, x + radius);
+      for (let k = lo; k <= hi; k++) if (cov[row + k] > m) m = cov[row + k];
+      tmp[row + x] = m;
+    }
+  }
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      let m = 0;
+      const lo = Math.max(0, y - radius);
+      const hi = Math.min(height - 1, y + radius);
+      for (let k = lo; k <= hi; k++) {
+        const v = tmp[k * width + x];
+        if (v > m) m = v;
+      }
+      out[y * width + x] = m;
+    }
+  }
+  return out;
+}
+
+/* ------------------------------------------------------------------ *
+ * Exact Euclidean distance transform (Felzenszwalb & Huttenlocher)
+ * ------------------------------------------------------------------ */
+
+const INF = 1e20;
+
+/** 1D squared distance transform of a sampled function, in place-ish. */
+function edt1d(f: Float64Array, d: Float64Array, v: Int32Array, z: Float64Array, n: number): void {
+  let k = 0;
+  v[0] = 0;
+  z[0] = -INF;
+  z[1] = INF;
+  for (let q = 1; q < n; q++) {
+    let s = (f[q] + q * q - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+    while (s <= z[k]) {
+      k--;
+      s = (f[q] + q * q - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+    }
+    k++;
+    v[k] = q;
+    z[k] = s;
+    z[k + 1] = INF;
+  }
+  k = 0;
+  for (let q = 0; q < n; q++) {
+    while (z[k + 1] < q) k++;
+    const dq = q - v[k];
+    d[q] = dq * dq + f[v[k]];
+  }
+}
+
+/**
+ * Distance (in working pixels) from every inside pixel to the nearest outside
+ * pixel. This replaces the Poisson solve a shader pipeline would use: it is
+ * O(n), needs no iteration count, and gives a true distance rather than a
+ * smoothed proxy — which is exactly what dot animations want for ordering a
+ * ripple from the outline inward.
+ */
+function distanceTransform(
+  mask: Uint8Array,
+  width: number,
+  height: number
+): { dist: Float32Array; max: number } {
+  const grid = new Float64Array(width * height);
+  for (let i = 0; i < grid.length; i++) grid[i] = mask[i] ? INF : 0;
+
+  const n = Math.max(width, height);
+  const f = new Float64Array(n);
+  const d = new Float64Array(n);
+  const v = new Int32Array(n);
+  const z = new Float64Array(n + 1);
+
+  for (let y = 0; y < height; y++) {
+    const row = y * width;
+    for (let x = 0; x < width; x++) f[x] = grid[row + x];
+    edt1d(f, d, v, z, width);
+    for (let x = 0; x < width; x++) grid[row + x] = d[x];
+  }
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) f[y] = grid[y * width + x];
+    edt1d(f, d, v, z, height);
+    for (let y = 0; y < height; y++) grid[y * width + x] = d[y];
+  }
+
+  const dist = new Float32Array(width * height);
+  let max = 0;
+  for (let i = 0; i < dist.length; i++) {
+    const val = Math.sqrt(grid[i]);
+    dist[i] = val;
+    if (val > max) max = val;
+  }
+  return { dist, max };
+}
+
+/* ------------------------------------------------------------------ *
+ * Bake
+ * ------------------------------------------------------------------ */
+
+/**
+ * Turn an image into a {@link DotMap}.
+ *
+ * Browser-only (it rasterizes through a canvas). Run it at build time via the
+ * CLI and ship the JSON, or at runtime when you want drop-in-any-logo behavior.
+ */
+export async function bake(source: BakeSource, options: BakeOptions = {}): Promise<DotMap> {
+  const opts = resolveBakeOptions(options);
+  const { data, width, height } = await rasterize(source, opts.workingSize);
+
+  const mode: 'alpha' | 'luma' =
+    opts.maskMode === 'auto' ? (hasAlpha(data.data) ? 'alpha' : 'luma') : opts.maskMode;
+
+  let cov = buildCoverage(data, width, height, mode, opts.invert);
+  if (opts.gamma !== 1) {
+    const g = Math.max(0.05, opts.gamma);
+    for (let i = 0; i < cov.length; i++) cov[i] = Math.pow(cov[i], g);
+  }
+  cov = dilateCoverage(cov, width, height, opts.dilate);
+
+  // Binary mask for the distance transform. A low fixed cut keeps antialiased
+  // edges inside the shape so the EDT measures the stroke, not the core.
+  const mask = new Uint8Array(cov.length);
+  for (let i = 0; i < cov.length; i++) mask[i] = cov[i] > 0.5 ? 1 : 0;
+
+  // Content bounds
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+  if (opts.trim) {
+    for (let y = 0; y < height; y++) {
+      const row = y * width;
+      for (let x = 0; x < width; x++) {
+        if (cov[row + x] > 0.06) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+  }
+  if (maxX < minX || maxY < minY) {
+    minX = 0;
+    minY = 0;
+    maxX = width - 1;
+    maxY = height - 1;
+  }
+  const boxW = maxX - minX + 1;
+  const boxH = maxY - minY + 1;
+
+  const { dist } = distanceTransform(mask, width, height);
+
+  // Grid the content box so the longest side gets `grid` cells.
+  const longest = Math.max(boxW, boxH);
+  const cols = Math.max(1, Math.round((boxW / longest) * opts.grid));
+  const rows = Math.max(1, Math.round((boxH / longest) * opts.grid));
+  const cellW = boxW / cols;
+  const cellH = boxH / rows;
+
+  const dots: Dot[] = [];
+  for (let row = 0; row < rows; row++) {
+    const y0 = Math.floor(minY + row * cellH);
+    const y1 = Math.max(y0 + 1, Math.floor(minY + (row + 1) * cellH));
+    for (let col = 0; col < cols; col++) {
+      const x0 = Math.floor(minX + col * cellW);
+      const x1 = Math.max(x0 + 1, Math.floor(minX + (col + 1) * cellW));
+
+      let sum = 0;
+      let count = 0;
+      let peakDist = 0;
+      for (let y = y0; y < y1 && y < height; y++) {
+        const r = y * width;
+        for (let x = x0; x < x1 && x < width; x++) {
+          sum += cov[r + x];
+          if (dist[r + x] > peakDist) peakDist = dist[r + x];
+          count++;
+        }
+      }
+      if (!count) continue;
+      const v = sum / count;
+      if (v < opts.threshold) continue;
+
+      dots.push({
+        col,
+        row,
+        x: (col + 0.5) / cols,
+        y: (row + 0.5) / rows,
+        v: clamp01(v),
+        d: peakDist,
+      });
+    }
+  }
+
+  // Normalize depth against the deepest *sampled* dot, not the deepest pixel.
+  // A hairline wordmark has a tiny absolute max distance; normalizing globally
+  // would flatten `d` to zero and make depth-driven presets inert.
+  let maxDepth = 0;
+  for (const dot of dots) if (dot.d > maxDepth) maxDepth = dot.d;
+  if (maxDepth > 0) for (const dot of dots) dot.d = clamp01(dot.d / maxDepth);
+  else for (const dot of dots) dot.d = 0;
+
+  return {
+    cols,
+    rows,
+    aspect: boxW / boxH,
+    dots,
+    cells: cols * rows,
+    maskMode: mode,
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * Cache
+ * ------------------------------------------------------------------ */
+
+const cache = new Map<string, Promise<DotMap>>();
+
+/** Cache key for a (source, options) pair. Only string sources are cacheable. */
+export function bakeKey(src: string, options: BakeOptions = {}): string {
+  const o = resolveBakeOptions(options);
+  return [
+    src,
+    o.grid,
+    o.threshold,
+    o.gamma,
+    o.maskMode,
+    o.invert ? 1 : 0,
+    o.dilate,
+    o.trim ? 1 : 0,
+    o.workingSize,
+  ].join('|');
+}
+
+/** {@link bake}, memoized per (url, options). */
+export function bakeCached(src: string, options: BakeOptions = {}): Promise<DotMap> {
+  const key = bakeKey(src, options);
+  let hit = cache.get(key);
+  if (!hit) {
+    hit = bake(src, options).catch((err) => {
+      cache.delete(key);
+      throw err;
+    });
+    cache.set(key, hit);
+  }
+  return hit;
+}
+
+export function clearBakeCache(): void {
+  cache.clear();
+}

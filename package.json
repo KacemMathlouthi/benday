@@ -1,0 +1,73 @@
+{
+  "name": "benday",
+  "version": "0.1.0",
+  "description": "Turn any logo into an animated dot-field thinking indicator for AI & agent UIs",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --config vite.config.lib.ts",
+    "build:demo": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "react",
+    "loading",
+    "thinking",
+    "thinking-logo",
+    "ai",
+    "agent",
+    "dots",
+    "halftone",
+    "benday",
+    "logo",
+    "spinner"
+  ],
+  "license": "MIT",
+  "author": "Kacem Mathlouthi",
+  "homepage": "https://github.com/KacemMathlouthi/benday#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KacemMathlouthi/benday.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KacemMathlouthi/benday/issues"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@typescript/typescript6": "^6.0.2",
+    "@vitejs/plugin-react": "^6.0.5",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0",
+    "vite-plugin-dts": "^5.0.3"
+  }
+}
