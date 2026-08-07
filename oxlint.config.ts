@@ -4,7 +4,18 @@ import react from "ultracite/oxlint/react";
 
 export default defineConfig({
   extends: [core, react],
-  ignorePatterns: [...core.ignorePatterns, "**/dist", ".turbo"],
+  ignorePatterns: [
+    ...core.ignorePatterns,
+    "**/dist",
+    ".turbo",
+    // Vendored verbatim from shadcn registries — regenerated, not authored.
+    "apps/web/src/components/ui",
+    "apps/web/src/components/ai-elements",
+    "apps/web/src/components/icons",
+    "apps/web/src/components/portal.tsx",
+    "apps/web/src/components/theme-provider.tsx",
+    "apps/web/src/hooks/use-scroll.ts",
+  ],
   rules: {
     // The renderer is a closure of mutually-referencing helpers; hoisted
     // function declarations let them be ordered by meaning rather than by

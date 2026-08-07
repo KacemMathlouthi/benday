@@ -121,11 +121,11 @@ A preset is just a function, so you can pass your own:
 ## Repository
 
 ```
-apps/playground     Vite SPA — drop a logo, tune every knob
+apps/web            the site — home, usage, playground
 packages/benday     the published package (core + ./react)
 ```
 
-Bun workspaces, Turborepo, Changesets, Ultracite (oxlint + oxfmt), Knip.
+Bun workspaces, Turborepo, Changesets, Ultracite (oxlint + oxfmt), Knip. The site is Vite + React Router + Tailwind v4 on shadcn's `base-lyra` style (Base UI, not Radix).
 
 ## Playground
 

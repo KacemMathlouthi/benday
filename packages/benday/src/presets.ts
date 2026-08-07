@@ -136,7 +136,7 @@ export const PRESETS: Record<PresetName, PresetDefinition> = {
   },
   contour: {
     description:
-      "The wave follows the shape’s own thickness — outline first, core last.",
+      "The wave follows the shape’s own thickness: outline first, core last.",
     fn: contour,
     label: "Contour",
     name: "contour",
