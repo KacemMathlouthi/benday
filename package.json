@@ -1,73 +1,45 @@
 {
-  "name": "benday",
-  "version": "0.1.0",
-  "description": "Turn any logo into an animated dot-field thinking indicator for AI & agent UIs",
-  "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
-      }
-    },
-    "./package.json": "./package.json"
+  "name": "benday-monorepo",
+  "private": true,
+  "homepage": "https://benday.kacemmathlouthi.dev",
+  "bugs": {
+    "url": "https://github.com/KacemMathlouthi/benday/issues"
   },
-  "files": [
-    "dist"
-  ],
-  "sideEffects": false,
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build --config vite.config.lib.ts",
-    "build:demo": "vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
-  },
-  "keywords": [
-    "react",
-    "loading",
-    "thinking",
-    "thinking-logo",
-    "ai",
-    "agent",
-    "dots",
-    "halftone",
-    "benday",
-    "logo",
-    "spinner"
-  ],
   "license": "MIT",
   "author": "Kacem Mathlouthi",
-  "homepage": "https://benday.kacemmathlouthi.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KacemMathlouthi/benday.git"
   },
-  "bugs": {
-    "url": "https://github.com/KacemMathlouthi/benday/issues"
-  },
-  "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "typecheck": "turbo run typecheck",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "knip": "knip",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "changeset": "changeset",
+    "version-packages": "changeset version && bun install --lockfile-only",
+    "release": "turbo run build --filter=benday && changeset publish"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "@typescript/typescript6": "^6.0.2",
-    "@vitejs/plugin-react": "^6.0.5",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
-    "vite": "^8.2.0",
-    "vite-plugin-dts": "^5.0.3"
-  }
+    "@changesets/cli": "^2.29.8",
+    "@types/bun": "^1.3.9",
+    "knip": "^5.66.1",
+    "oxfmt": "^0.62.0",
+    "oxlint": "^1.77.0",
+    "turbo": "^2.8.14",
+    "typescript": "^5.9.3",
+    "ultracite": "^7.1.4"
+  },
+  "engines": {
+    "bun": ">=1.3.0"
+  },
+  "packageManager": "bun@1.3.9"
 }

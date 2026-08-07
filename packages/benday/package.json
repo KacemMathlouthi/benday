@@ -1,0 +1,68 @@
+{
+  "name": "benday",
+  "version": "0.1.0",
+  "description": "Turn any logo into an animated dot-field thinking indicator for AI & agent UIs",
+  "keywords": [
+    "agent",
+    "ai",
+    "benday",
+    "dots",
+    "halftone",
+    "loading",
+    "logo",
+    "react",
+    "spinner",
+    "thinking",
+    "thinking-logo"
+  ],
+  "homepage": "https://benday.kacemmathlouthi.dev",
+  "bugs": {
+    "url": "https://github.com/KacemMathlouthi/benday/issues"
+  },
+  "license": "MIT",
+  "author": "Kacem Mathlouthi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KacemMathlouthi/benday.git",
+    "directory": "packages/benday"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "clean": "rm -rf dist .turbo",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "react": "^19.2.8"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}

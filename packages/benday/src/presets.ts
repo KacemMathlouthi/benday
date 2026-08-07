@@ -1,20 +1,20 @@
-import type { DotContext, DotFrame, Preset, PresetName } from './types';
+import type { DotFrame, Preset, PresetName } from "./types";
 
 /* ------------------------------------------------------------------ *
  * Small math helpers
  * ------------------------------------------------------------------ */
 
-const TAU = Math.PI * 2;
 const fract = (v: number) => v - Math.floor(v);
 /** Signed wrapped difference in a 0..1 cyclic space, -0.5..0.5. */
 const cyclicDelta = (v: number) => {
   const d = fract(v);
   return d > 0.5 ? d - 1 : d;
 };
-const gauss = (d: number, sigma: number) => Math.exp(-(d * d) / (2 * sigma * sigma));
+const gauss = (d: number, sigma: number) =>
+  Math.exp(-(d * d) / (2 * sigma * sigma));
 
 function hash2(x: number, y: number): number {
-  const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  const s = Math.sin(x * 127.1 + y * 311.7) * 43_758.5453;
   return s - Math.floor(s);
 }
 
@@ -66,7 +66,7 @@ const ripple: Preset = (c, t, out) => {
  */
 const contour: Preset = (c, t, out) => {
   const w = (Math.sin(t * 2.2 - c.d * 6.5) + 1) / 2;
-  const g = Math.pow(w, 1.6);
+  const g = w ** 1.6;
   out.a = 0.16 + 0.84 * g;
   out.s = 0.7 + 0.55 * g;
   out.dx = 0;
@@ -128,47 +128,48 @@ export interface PresetDefinition {
 }
 
 export const PRESETS: Record<PresetName, PresetDefinition> = {
-  shimmer: {
-    name: 'shimmer',
-    label: 'Shimmer',
-    description: 'A lit band sweeps the mark on the diagonal.',
-    fn: shimmer,
-  },
-  ripple: {
-    name: 'ripple',
-    label: 'Ripple',
-    description: 'Concentric rings pulse outward from the center.',
-    fn: ripple,
+  breathe: {
+    description: "The whole mark swells and settles.",
+    fn: breathe,
+    label: "Breathe",
+    name: "breathe",
   },
   contour: {
-    name: 'contour',
-    label: 'Contour',
-    description: 'The wave follows the shape’s own thickness — outline first, core last.',
+    description:
+      "The wave follows the shape’s own thickness — outline first, core last.",
     fn: contour,
-  },
-  scatter: {
-    name: 'scatter',
-    label: 'Scatter',
-    description: 'Dots drift off the lattice, then reconverge into the mark.',
-    fn: scatter,
+    label: "Contour",
+    name: "contour",
   },
   flicker: {
-    name: 'flicker',
-    label: 'Flicker',
-    description: 'A random subset blinks at any moment.',
+    description: "A random subset blinks at any moment.",
     fn: flicker,
+    label: "Flicker",
+    name: "flicker",
   },
-  breathe: {
-    name: 'breathe',
-    label: 'Breathe',
-    description: 'The whole mark swells and settles.',
-    fn: breathe,
+  ripple: {
+    description: "Concentric rings pulse outward from the center.",
+    fn: ripple,
+    label: "Ripple",
+    name: "ripple",
+  },
+  scatter: {
+    description: "Dots drift off the lattice, then reconverge into the mark.",
+    fn: scatter,
+    label: "Scatter",
+    name: "scatter",
+  },
+  shimmer: {
+    description: "A lit band sweeps the mark on the diagonal.",
+    fn: shimmer,
+    label: "Shimmer",
+    name: "shimmer",
   },
   swirl: {
-    name: 'swirl',
-    label: 'Swirl',
-    description: 'The mark twists around its center, outer dots lagging.',
+    description: "The mark twists around its center, outer dots lagging.",
     fn: swirl,
+    label: "Swirl",
+    name: "swirl",
   },
 };
 
@@ -180,8 +181,5 @@ export function dotRandom(i: number): number {
 }
 
 export function makeFrame(): DotFrame {
-  return { s: 1, a: 1, dx: 0, dy: 0 };
+  return { a: 1, dx: 0, dy: 0, s: 1 };
 }
-
-export { TAU };
-export type { DotContext };

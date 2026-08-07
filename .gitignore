@@ -1,6 +1,7 @@
 node_modules
 dist
-dist-demo
+.turbo
+.next
 .DS_Store
 *.log
 .playwright-mcp

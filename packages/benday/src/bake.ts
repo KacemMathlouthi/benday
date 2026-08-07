@@ -1,16 +1,28 @@
-import type { BakeOptions, Dot, DotMap, ResolvedBakeOptions } from './types';
+import type {
+  BakeOptions,
+  Dot,
+  DotMap,
+  MaskMode,
+  ResolvedBakeOptions,
+} from "./types";
 
-export const DEFAULT_BAKE: Omit<ResolvedBakeOptions, 'workingSize'> = {
-  grid: 24,
-  threshold: 0.18,
-  gamma: 1,
-  maskMode: 'auto',
-  invert: false,
+export const DEFAULT_BAKE: Omit<ResolvedBakeOptions, "workingSize"> = {
   dilate: 0,
+  gamma: 1,
+  grid: 24,
+  invert: false,
+  maskMode: "auto",
+  threshold: 0.18,
   trim: true,
 };
 
-export function resolveBakeOptions(options: BakeOptions = {}): ResolvedBakeOptions {
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.min(hi, Math.max(lo, v));
+const clamp01 = (v: number) => clamp(v, 0, 1);
+
+export function resolveBakeOptions(
+  options: BakeOptions = {}
+): ResolvedBakeOptions {
   const merged = { ...DEFAULT_BAKE, ...stripUndefined(options) };
   const workingSize =
     options.workingSize ?? clamp(Math.round(merged.grid * 16), 192, 768);
@@ -19,14 +31,13 @@ export function resolveBakeOptions(options: BakeOptions = {}): ResolvedBakeOptio
 
 function stripUndefined<T extends object>(o: T): Partial<T> {
   const out: Partial<T> = {};
-  for (const k of Object.keys(o) as Array<keyof T>) {
-    if (o[k] !== undefined) out[k] = o[k];
+  for (const k of Object.keys(o) as (keyof T)[]) {
+    if (o[k] !== undefined) {
+      out[k] = o[k];
+    }
   }
   return out;
 }
-
-const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
 /* ------------------------------------------------------------------ *
  * Image loading
@@ -37,9 +48,13 @@ export type BakeSource = string | Blob | HTMLImageElement | ImageBitmap;
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`benday: failed to load image "${src}"`));
+    img.crossOrigin = "anonymous";
+    img.addEventListener("load", () => resolve(img), { once: true });
+    img.addEventListener(
+      "error",
+      () => reject(new Error(`benday: failed to load image "${src}"`)),
+      { once: true }
+    );
     img.src = src;
   });
 }
@@ -61,12 +76,15 @@ async function rasterize(
   let revoke: string | undefined;
 
   try {
-    if (typeof source === 'string') {
+    if (typeof source === "string") {
       const img = await loadImage(source);
       el = img;
       iw = img.naturalWidth || img.width;
       ih = img.naturalHeight || img.height;
-    } else if (typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap) {
+    } else if (
+      typeof ImageBitmap !== "undefined" &&
+      source instanceof ImageBitmap
+    ) {
       el = source;
       iw = source.width;
       ih = source.height;
@@ -93,13 +111,15 @@ async function rasterize(
     const width = Math.max(1, Math.round(iw * scale));
     const height = Math.max(1, Math.round(ih * scale));
 
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) throw new Error('benday: could not acquire a 2D context');
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) {
+      throw new Error("benday: could not acquire a 2D context");
+    }
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(el, 0, 0, width, height);
 
     let data: ImageData;
@@ -107,12 +127,14 @@ async function rasterize(
       data = ctx.getImageData(0, 0, width, height);
     } catch {
       throw new Error(
-        'benday: the image tainted the canvas (cross-origin without CORS headers)'
+        "benday: the image tainted the canvas (cross-origin without CORS headers)"
       );
     }
-    return { data, width, height };
+    return { data, height, width };
   } finally {
-    if (revoke) URL.revokeObjectURL(revoke);
+    if (revoke) {
+      URL.revokeObjectURL(revoke);
+    }
   }
 }
 
@@ -120,7 +142,8 @@ async function rasterize(
  * Mask building
  * ------------------------------------------------------------------ */
 
-const luma = (r: number, g: number, b: number) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+const luma = (r: number, g: number, b: number) =>
+  (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 
 function hasAlpha(px: Uint8ClampedArray): boolean {
   // A handful of soft edge pixels is enough; a fully opaque photo has none.
@@ -128,7 +151,9 @@ function hasAlpha(px: Uint8ClampedArray): boolean {
   for (let i = 3; i < px.length; i += 4) {
     if (px[i] < 250) {
       soft++;
-      if (soft > 8) return true;
+      if (soft > 8) {
+        return true;
+      }
     }
   }
   return false;
@@ -145,14 +170,16 @@ function buildCoverage(
   img: ImageData,
   width: number,
   height: number,
-  mode: 'alpha' | 'luma',
+  mode: "alpha" | "luma",
   invert: boolean
 ): Float32Array {
   const px = img.data;
   const cov = new Float32Array(width * height);
 
-  if (mode === 'alpha') {
-    for (let i = 0, p = 0; p < cov.length; i += 4, p++) cov[p] = px[i + 3] / 255;
+  if (mode === "alpha") {
+    for (let i = 0, p = 0; p < cov.length; i += 4, p++) {
+      cov[p] = px[i + 3] / 255;
+    }
     return cov;
   }
 
@@ -162,13 +189,19 @@ function buildCoverage(
     (height - 1) * width * 4,
     ((height - 1) * width + width - 1) * 4,
   ];
-  const cornerLuma = corners.map((i) => luma(px[i], px[i + 1], px[i + 2])).sort((a, b) => a - b);
+  const cornerLuma = corners
+    .map((i) => luma(px[i], px[i + 1], px[i + 2]))
+    .toSorted((a, b) => a - b);
   let bg = (cornerLuma[1] + cornerLuma[2]) / 2; // median of four
   let bgIsLight = bg > 0.5;
-  if (invert) bgIsLight = !bgIsLight;
+  if (invert) {
+    bgIsLight = !bgIsLight;
+  }
   // Guard against a background that sits mid-grey, which would leave no headroom.
   const span = Math.max(0.12, bgIsLight ? bg : 1 - bg);
-  if (!bgIsLight) bg = Math.min(bg, 1 - span);
+  if (!bgIsLight) {
+    bg = Math.min(bg, 1 - span);
+  }
 
   for (let i = 0, p = 0; p < cov.length; i += 4, p++) {
     const l = luma(px[i], px[i + 1], px[i + 2]);
@@ -180,8 +213,15 @@ function buildCoverage(
 }
 
 /** Separable box dilation — grows the mask to rescue hairline strokes. */
-function dilateCoverage(cov: Float32Array, width: number, height: number, r: number): Float32Array {
-  if (r <= 0) return cov;
+function dilateCoverage(
+  cov: Float32Array,
+  width: number,
+  height: number,
+  r: number
+): Float32Array {
+  if (r <= 0) {
+    return cov;
+  }
   const radius = Math.round(r);
   const tmp = new Float32Array(cov.length);
   const out = new Float32Array(cov.length);
@@ -192,7 +232,11 @@ function dilateCoverage(cov: Float32Array, width: number, height: number, r: num
       let m = 0;
       const lo = Math.max(0, x - radius);
       const hi = Math.min(width - 1, x + radius);
-      for (let k = lo; k <= hi; k++) if (cov[row + k] > m) m = cov[row + k];
+      for (let k = lo; k <= hi; k++) {
+        if (cov[row + k] > m) {
+          m = cov[row + k];
+        }
+      }
       tmp[row + x] = m;
     }
   }
@@ -203,7 +247,9 @@ function dilateCoverage(cov: Float32Array, width: number, height: number, r: num
       const hi = Math.min(height - 1, y + radius);
       for (let k = lo; k <= hi; k++) {
         const v = tmp[k * width + x];
-        if (v > m) m = v;
+        if (v > m) {
+          m = v;
+        }
       }
       out[y * width + x] = m;
     }
@@ -218,7 +264,13 @@ function dilateCoverage(cov: Float32Array, width: number, height: number, r: num
 const INF = 1e20;
 
 /** 1D squared distance transform of a sampled function, in place-ish. */
-function edt1d(f: Float64Array, d: Float64Array, v: Int32Array, z: Float64Array, n: number): void {
+function edt1d(
+  f: Float64Array,
+  d: Float64Array,
+  v: Int32Array,
+  z: Float64Array,
+  n: number
+): void {
   let k = 0;
   v[0] = 0;
   z[0] = -INF;
@@ -236,7 +288,9 @@ function edt1d(f: Float64Array, d: Float64Array, v: Int32Array, z: Float64Array,
   }
   k = 0;
   for (let q = 0; q < n; q++) {
-    while (z[k + 1] < q) k++;
+    while (z[k + 1] < q) {
+      k++;
+    }
     const dq = q - v[k];
     d[q] = dq * dq + f[v[k]];
   }
@@ -255,7 +309,9 @@ function distanceTransform(
   height: number
 ): { dist: Float32Array; max: number } {
   const grid = new Float64Array(width * height);
-  for (let i = 0; i < grid.length; i++) grid[i] = mask[i] ? INF : 0;
+  for (let i = 0; i < grid.length; i++) {
+    grid[i] = mask[i] ? INF : 0;
+  }
 
   const n = Math.max(width, height);
   const f = new Float64Array(n);
@@ -265,14 +321,22 @@ function distanceTransform(
 
   for (let y = 0; y < height; y++) {
     const row = y * width;
-    for (let x = 0; x < width; x++) f[x] = grid[row + x];
+    for (let x = 0; x < width; x++) {
+      f[x] = grid[row + x];
+    }
     edt1d(f, d, v, z, width);
-    for (let x = 0; x < width; x++) grid[row + x] = d[x];
+    for (let x = 0; x < width; x++) {
+      grid[row + x] = d[x];
+    }
   }
   for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) f[y] = grid[y * width + x];
+    for (let y = 0; y < height; y++) {
+      f[y] = grid[y * width + x];
+    }
     edt1d(f, d, v, z, height);
-    for (let y = 0; y < height; y++) grid[y * width + x] = d[y];
+    for (let y = 0; y < height; y++) {
+      grid[y * width + x] = d[y];
+    }
   }
 
   const dist = new Float32Array(width * height);
@@ -280,7 +344,9 @@ function distanceTransform(
   for (let i = 0; i < dist.length; i++) {
     const val = Math.sqrt(grid[i]);
     dist[i] = val;
-    if (val > max) max = val;
+    if (val > max) {
+      max = val;
+    }
   }
   return { dist, max };
 }
@@ -289,116 +355,197 @@ function distanceTransform(
  * Bake
  * ------------------------------------------------------------------ */
 
+interface ContentBounds {
+  minX: number;
+  minY: number;
+  boxW: number;
+  boxH: number;
+}
+
+/** Which masking strategy to run, resolving `auto` against the pixels. */
+function resolveMaskMode(
+  mode: MaskMode,
+  pixels: Uint8ClampedArray
+): "alpha" | "luma" {
+  if (mode !== "auto") {
+    return mode;
+  }
+  return hasAlpha(pixels) ? "alpha" : "luma";
+}
+
+/**
+ * Bounding box of everything with meaningful ink. Falls back to the full frame
+ * when trimming is off or the image turned out empty.
+ */
+function findContentBounds(
+  cov: Float32Array,
+  width: number,
+  height: number,
+  trim: boolean
+): ContentBounds {
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  if (trim) {
+    for (let y = 0; y < height; y++) {
+      const row = y * width;
+      for (let x = 0; x < width; x++) {
+        if (cov[row + x] > 0.06) {
+          minX = Math.min(minX, x);
+          maxX = Math.max(maxX, x);
+          minY = Math.min(minY, y);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+  }
+
+  if (maxX < minX || maxY < minY) {
+    return { boxH: height, boxW: width, minX: 0, minY: 0 };
+  }
+  return {
+    boxH: maxY - minY + 1,
+    boxW: maxX - minX + 1,
+    minX,
+    minY,
+  };
+}
+
+/**
+ * Average coverage and peak depth per grid cell, keeping the cells that clear
+ * the threshold.
+ */
+function sampleDots(
+  cov: Float32Array,
+  dist: Float32Array,
+  width: number,
+  height: number,
+  bounds: ContentBounds,
+  cols: number,
+  rows: number,
+  threshold: number
+): Dot[] {
+  const cellW = bounds.boxW / cols;
+  const cellH = bounds.boxH / rows;
+  const dots: Dot[] = [];
+
+  for (let row = 0; row < rows; row++) {
+    const y0 = Math.floor(bounds.minY + row * cellH);
+    const y1 = Math.max(y0 + 1, Math.floor(bounds.minY + (row + 1) * cellH));
+
+    for (let col = 0; col < cols; col++) {
+      const x0 = Math.floor(bounds.minX + col * cellW);
+      const x1 = Math.max(x0 + 1, Math.floor(bounds.minX + (col + 1) * cellW));
+
+      let sum = 0;
+      let count = 0;
+      let peakDist = 0;
+
+      for (let y = y0; y < y1 && y < height; y++) {
+        const r = y * width;
+        for (let x = x0; x < x1 && x < width; x++) {
+          sum += cov[r + x];
+          peakDist = Math.max(peakDist, dist[r + x]);
+          count++;
+        }
+      }
+
+      if (count === 0) {
+        continue;
+      }
+      const v = sum / count;
+      if (v < threshold) {
+        continue;
+      }
+
+      dots.push({
+        col,
+        d: peakDist,
+        row,
+        v: clamp01(v),
+        x: (col + 0.5) / cols,
+        y: (row + 0.5) / rows,
+      });
+    }
+  }
+
+  return dots;
+}
+
+/**
+ * Rescale depth against the deepest *sampled* dot rather than the deepest
+ * pixel. A hairline wordmark has a tiny absolute max distance; normalizing
+ * globally would flatten `d` to zero and leave depth-driven presets inert.
+ */
+function normalizeDepth(dots: Dot[]): void {
+  let maxDepth = 0;
+  for (const dot of dots) {
+    maxDepth = Math.max(maxDepth, dot.d);
+  }
+  for (const dot of dots) {
+    dot.d = maxDepth > 0 ? clamp01(dot.d / maxDepth) : 0;
+  }
+}
+
 /**
  * Turn an image into a {@link DotMap}.
  *
- * Browser-only (it rasterizes through a canvas). Run it at build time via the
- * CLI and ship the JSON, or at runtime when you want drop-in-any-logo behavior.
+ * Browser-only — it rasterizes through a canvas. Run it at build time and ship
+ * the JSON, or at runtime when you want drop-in-any-logo behavior.
  */
-export async function bake(source: BakeSource, options: BakeOptions = {}): Promise<DotMap> {
+export async function bake(
+  source: BakeSource,
+  options: BakeOptions = {}
+): Promise<DotMap> {
   const opts = resolveBakeOptions(options);
   const { data, width, height } = await rasterize(source, opts.workingSize);
-
-  const mode: 'alpha' | 'luma' =
-    opts.maskMode === 'auto' ? (hasAlpha(data.data) ? 'alpha' : 'luma') : opts.maskMode;
+  const mode = resolveMaskMode(opts.maskMode, data.data);
 
   let cov = buildCoverage(data, width, height, mode, opts.invert);
   if (opts.gamma !== 1) {
     const g = Math.max(0.05, opts.gamma);
-    for (let i = 0; i < cov.length; i++) cov[i] = Math.pow(cov[i], g);
+    for (let i = 0; i < cov.length; i++) {
+      cov[i] **= g;
+    }
   }
   cov = dilateCoverage(cov, width, height, opts.dilate);
 
   // Binary mask for the distance transform. A low fixed cut keeps antialiased
   // edges inside the shape so the EDT measures the stroke, not the core.
   const mask = new Uint8Array(cov.length);
-  for (let i = 0; i < cov.length; i++) mask[i] = cov[i] > 0.5 ? 1 : 0;
-
-  // Content bounds
-  let minX = width;
-  let minY = height;
-  let maxX = -1;
-  let maxY = -1;
-  if (opts.trim) {
-    for (let y = 0; y < height; y++) {
-      const row = y * width;
-      for (let x = 0; x < width; x++) {
-        if (cov[row + x] > 0.06) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-        }
-      }
-    }
+  for (let i = 0; i < cov.length; i++) {
+    mask[i] = cov[i] > 0.5 ? 1 : 0;
   }
-  if (maxX < minX || maxY < minY) {
-    minX = 0;
-    minY = 0;
-    maxX = width - 1;
-    maxY = height - 1;
-  }
-  const boxW = maxX - minX + 1;
-  const boxH = maxY - minY + 1;
 
+  const bounds = findContentBounds(cov, width, height, opts.trim);
   const { dist } = distanceTransform(mask, width, height);
 
   // Grid the content box so the longest side gets `grid` cells.
-  const longest = Math.max(boxW, boxH);
-  const cols = Math.max(1, Math.round((boxW / longest) * opts.grid));
-  const rows = Math.max(1, Math.round((boxH / longest) * opts.grid));
-  const cellW = boxW / cols;
-  const cellH = boxH / rows;
+  const longest = Math.max(bounds.boxW, bounds.boxH);
+  const cols = Math.max(1, Math.round((bounds.boxW / longest) * opts.grid));
+  const rows = Math.max(1, Math.round((bounds.boxH / longest) * opts.grid));
 
-  const dots: Dot[] = [];
-  for (let row = 0; row < rows; row++) {
-    const y0 = Math.floor(minY + row * cellH);
-    const y1 = Math.max(y0 + 1, Math.floor(minY + (row + 1) * cellH));
-    for (let col = 0; col < cols; col++) {
-      const x0 = Math.floor(minX + col * cellW);
-      const x1 = Math.max(x0 + 1, Math.floor(minX + (col + 1) * cellW));
-
-      let sum = 0;
-      let count = 0;
-      let peakDist = 0;
-      for (let y = y0; y < y1 && y < height; y++) {
-        const r = y * width;
-        for (let x = x0; x < x1 && x < width; x++) {
-          sum += cov[r + x];
-          if (dist[r + x] > peakDist) peakDist = dist[r + x];
-          count++;
-        }
-      }
-      if (!count) continue;
-      const v = sum / count;
-      if (v < opts.threshold) continue;
-
-      dots.push({
-        col,
-        row,
-        x: (col + 0.5) / cols,
-        y: (row + 0.5) / rows,
-        v: clamp01(v),
-        d: peakDist,
-      });
-    }
-  }
-
-  // Normalize depth against the deepest *sampled* dot, not the deepest pixel.
-  // A hairline wordmark has a tiny absolute max distance; normalizing globally
-  // would flatten `d` to zero and make depth-driven presets inert.
-  let maxDepth = 0;
-  for (const dot of dots) if (dot.d > maxDepth) maxDepth = dot.d;
-  if (maxDepth > 0) for (const dot of dots) dot.d = clamp01(dot.d / maxDepth);
-  else for (const dot of dots) dot.d = 0;
-
-  return {
+  const dots = sampleDots(
+    cov,
+    dist,
+    width,
+    height,
+    bounds,
     cols,
     rows,
-    aspect: boxW / boxH,
-    dots,
+    opts.threshold
+  );
+  normalizeDepth(dots);
+
+  return {
+    aspect: bounds.boxW / bounds.boxH,
     cells: cols * rows,
+    cols,
+    dots,
     maskMode: mode,
+    rows,
   };
 }
 
@@ -421,18 +568,32 @@ export function bakeKey(src: string, options: BakeOptions = {}): string {
     o.dilate,
     o.trim ? 1 : 0,
     o.workingSize,
-  ].join('|');
+  ].join("|");
+}
+
+/** A failed bake must not stay cached, or the error is permanent. */
+async function bakeAndForgetOnFailure(
+  key: string,
+  src: string,
+  options: BakeOptions
+): Promise<DotMap> {
+  try {
+    return await bake(src, options);
+  } catch (error) {
+    cache.delete(key);
+    throw error;
+  }
 }
 
 /** {@link bake}, memoized per (url, options). */
-export function bakeCached(src: string, options: BakeOptions = {}): Promise<DotMap> {
+export function bakeCached(
+  src: string,
+  options: BakeOptions = {}
+): Promise<DotMap> {
   const key = bakeKey(src, options);
   let hit = cache.get(key);
   if (!hit) {
-    hit = bake(src, options).catch((err) => {
-      cache.delete(key);
-      throw err;
-    });
+    hit = bakeAndForgetOnFailure(key, src, options);
     cache.set(key, hit);
   }
   return hit;
