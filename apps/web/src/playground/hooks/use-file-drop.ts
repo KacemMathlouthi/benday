@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { Sample } from "@/playground/samples";
+import type { Source } from "@/playground/lib/source";
 
 /**
  * Whole-window drag-and-drop for image files. Reads to a data URI so the
  * dropped file becomes an ordinary cacheable string source.
  */
-export function useFileDrop(onFile: (sample: Sample) => void) {
+export function useFileDrop(onFile: (source: Source) => void) {
   const [dragging, setDragging] = useState(false);
 
   const ingest = useCallback(
@@ -18,7 +18,6 @@ export function useFileDrop(onFile: (sample: Sample) => void) {
           onFile({
             id: `upload-${file.name}-${file.size}`,
             label: file.name,
-            note: `${file.type || "unknown type"} · ${(file.size / 1024).toFixed(1)} KB`,
             src: String(reader.result),
           });
         },

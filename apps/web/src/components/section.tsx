@@ -9,21 +9,27 @@ import { cn } from "@/lib/utils";
 export function PageHeader({
   title,
   lead,
+  aside,
   children,
 }: {
   title: string;
   lead?: string;
+  /** Optional artwork or status, pinned to the right of the title block. */
+  aside?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   return (
-    <header className="py-14">
-      <h1 className="font-medium text-3xl tracking-tight">{title}</h1>
-      {lead && (
-        <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
-          {lead}
-        </p>
-      )}
-      {children && <div className="mt-6">{children}</div>}
+    <header className="flex items-start justify-between gap-8 py-14">
+      <div className="min-w-0">
+        <h1 className="font-medium text-3xl tracking-tight">{title}</h1>
+        {lead && (
+          <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
+            {lead}
+          </p>
+        )}
+        {children && <div className="mt-6">{children}</div>}
+      </div>
+      {aside && <div className="shrink-0">{aside}</div>}
     </header>
   );
 }

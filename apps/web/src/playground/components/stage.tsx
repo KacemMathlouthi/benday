@@ -1,129 +1,220 @@
-import type { DotMap, ThinkingState } from "benday";
-import { ThinkingLogo } from "benday/react";
+import type { BakeOptions, DotMap } from "benday";
+import { ThinkingLogo, useDotMap } from "benday/react";
+import { RefreshCwIcon, RocketIcon, SparklesIcon, SearchIcon } from "lucide-react";
+import { useMemo } from "react";
 
-import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import type { Patch, RenderState } from "@/playground/lib/state";
-import type { Sample } from "@/playground/samples";
+import { AgentPreview } from "@/playground/components/agent-preview";
+import { LoaderButton } from "@/playground/components/loader-button";
+import { gridForSize } from "@/playground/lib/grid";
+import { logoProps } from "@/playground/lib/logo-props";
+import type { LogoProps } from "@/playground/lib/logo-props";
+import type { RenderState } from "@/playground/lib/state";
 
-const STATES: ThinkingState[] = ["idle", "thinking", "done"];
-const STATE_LABELS: Record<ThinkingState, string> = {
-  done: "Done",
-  idle: "Idle",
-  thinking: "Thinking",
-};
 const SIZES = [64, 32, 20];
 
-/** The props every preview on the stage shares. */
-function logoProps(render: RenderState, dotMap: DotMap | null) {
-  return {
-    color: render.color,
-    dotMap: dotMap ?? undefined,
-    dotScale: render.dotScale,
-    fit: render.fitNatural ? ("natural" as const) : ("square" as const),
-    glow: render.glow,
-    padding: render.padding,
-    paused: render.paused,
-    preset: render.preset,
-    shape: render.shape,
-    speed: render.speed,
-    state: render.state,
-    weight: render.weight,
-  };
-}
+/** The slot the inline indicators sit in, and so the grid they bake for. */
+const INLINE_SIZE = 18;
+
+const LOADERS = [
+  { icon: SparklesIcon, idle: "Generate", working: "Generating" },
+  { icon: RocketIcon, idle: "Deploy", working: "Shipping" },
+  { icon: SearchIcon, idle: "Search", working: "Searching" },
+  { icon: RefreshCwIcon, idle: "Sync", working: "Syncing" },
+];
 
 function Caption({ children }: { children: React.ReactNode }) {
   return <span className="text-muted-foreground text-xs">{children}</span>;
 }
 
-export function Stage({
-  source,
-  dotMap,
-  loading,
-  error,
+/**
+ * A map baked at a grid `size` can actually resolve. Reusing the full-size map
+ * on a small logo is what turns an 18px indicator into grey fuzz; `bakeCached`
+ * keys on source plus options, so previews at the same size share one bake.
+ */
+function useSizedMap(
+  src: string,
+  bakeOptions: BakeOptions,
+  render: RenderState,
+  size: number
+): DotMap | null {
+  const grid = gridForSize(size, render, bakeOptions.grid ?? 24);
+  const options = useMemo(() => ({ ...bakeOptions, grid }), [bakeOptions, grid]);
+  return useDotMap(src, options).dotMap;
+}
+
+/** One of the small size swatches, baked for its own size. */
+function SizeSwatch({
+  logo,
+  size,
+  src,
+  bakeOptions,
   render,
-  patch,
 }: {
-  source: Sample;
-  dotMap: DotMap | null;
-  loading: boolean;
-  error: Error | null;
+  logo: LogoProps;
+  size: number;
+  src: string;
+  bakeOptions: BakeOptions;
   render: RenderState;
-  patch: Patch<RenderState>;
 }) {
-  const shared = logoProps(render, dotMap);
+  const dotMap = useSizedMap(src, bakeOptions, render, size);
 
   return (
-    <section className="border border-border">
-      <div className="flex min-h-[320px] flex-wrap items-center justify-center gap-12 px-6 py-10">
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex size-50 items-center justify-center bg-muted p-4">
-            <img
-              alt={`${source.label} source artwork`}
-              className="max-h-full max-w-full object-contain dark:invert"
-              src={source.src}
-            />
-          </div>
-          <Caption>Source</Caption>
-        </div>
+    <div className="flex flex-col items-center gap-2">
+      <ThinkingLogo
+        {...logo}
+        dotMap={dotMap ?? undefined}
+        size={size}
+        state="thinking"
+      />
+      <Caption>{size}px</Caption>
+    </div>
+  );
+}
 
+function SimplePreview({
+  logo,
+  size,
+  loading,
+  error,
+  src,
+  bakeOptions,
+  render,
+}: {
+  logo: LogoProps;
+  size: number;
+  loading: boolean;
+  error: Error | null;
+  src: string;
+  bakeOptions: BakeOptions;
+  render: RenderState;
+}) {
+  return (
+    <div className="flex flex-col">
+      <div className="flex min-h-[320px] items-center justify-center px-6 py-10">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex size-50 items-center justify-center">
+          <div className="flex min-h-50 items-center justify-center">
             {error ? (
               <p className="max-w-[220px] text-center text-destructive text-sm">
                 {error.message}
               </p>
             ) : (
-              <ThinkingLogo {...shared} size={render.size} />
+              <ThinkingLogo {...logo} size={size} state="thinking" />
             )}
           </div>
           <Caption>{loading ? "Baking…" : "Dots"}</Caption>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-6 border-border border-t px-4 py-3">
-        <div className="flex items-center gap-2">
-          <ToggleGroup
-            onValueChange={(next) => {
-              const picked = next[0] as ThinkingState | undefined;
-              if (picked) {
-                patch({ state: picked });
-              }
-            }}
-            size="sm"
-            value={[render.state]}
-            variant="outline"
-          >
-            {STATES.map((state) => (
-              <ToggleGroupItem key={state} value={state}>
-                {STATE_LABELS[state]}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-
-          <Button
-            onClick={() => patch({ paused: !render.paused })}
-            size="sm"
-            variant={render.paused ? "secondary" : "ghost"}
-          >
-            {render.paused ? "Resume" : "Pause"}
-          </Button>
-        </div>
-
-        <div className="flex items-end gap-6">
-          {SIZES.map((size) => (
-            <div className="flex flex-col items-center gap-2" key={size}>
-              <ThinkingLogo {...shared} size={size} />
-              <Caption>{size}px</Caption>
-            </div>
-          ))}
-        </div>
+      <div className="flex flex-wrap items-end justify-center gap-6 border-border border-t px-4 py-4">
+        {SIZES.map((preview) => (
+          <SizeSwatch
+            bakeOptions={bakeOptions}
+            key={preview}
+            logo={logo}
+            render={render}
+            size={preview}
+            src={src}
+          />
+        ))}
       </div>
+    </div>
+  );
+}
 
-      <div className="flex items-center gap-2.5 border-border border-t px-4 py-3 text-muted-foreground text-sm">
-        <ThinkingLogo {...shared} size={18} />
-        <span>Searching the codebase for the auth middleware…</span>
+function LoadersPreview({
+  logo,
+  inlineMap,
+}: {
+  logo: LogoProps;
+  inlineMap: DotMap | null;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-5 px-6 py-8">
+      {/* Two per row, and every cell the same width, so the buttons do not
+          jump around as their labels change length mid-run. */}
+      <div className="grid grid-cols-2 gap-3">
+        {LOADERS.map((loader) => (
+          <LoaderButton
+            dotMap={inlineMap}
+            icon={loader.icon}
+            idle={loader.idle}
+            key={loader.idle}
+            logo={logo}
+            working={loader.working}
+          />
+        ))}
       </div>
+      <p className="max-w-md text-center text-muted-foreground text-sm leading-relaxed">
+        Click one. The icon blurs out as the mark resolves in, the animation
+        runs, and the settle spring pulls the dots back into the logo.
+      </p>
+    </div>
+  );
+}
+
+/** One preview section: a titled band matching the control panels' chrome. */
+function Preview({
+  title,
+  lead,
+  children,
+}: {
+  title: string;
+  lead: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border border-border">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 border-border border-b bg-muted px-4 py-2">
+        <h2 className="font-medium text-sm">{title}</h2>
+        <p className="text-muted-foreground text-xs">{lead}</p>
+      </div>
+      {children}
     </section>
+  );
+}
+
+export function Stage({
+  dotMap,
+  loading,
+  error,
+  render,
+  src,
+  bakeOptions,
+}: {
+  dotMap: DotMap | null;
+  loading: boolean;
+  error: Error | null;
+  render: RenderState;
+  src: string;
+  bakeOptions: BakeOptions;
+}) {
+  const logo = logoProps(render, dotMap);
+  const inlineMap = useSizedMap(src, bakeOptions, render, INLINE_SIZE);
+
+  return (
+    <>
+      <Preview lead="The mark on its own, at four sizes." title="Simple">
+        <SimplePreview
+          bakeOptions={bakeOptions}
+          error={error}
+          loading={loading}
+          logo={logo}
+          render={render}
+          size={render.size}
+          src={src}
+        />
+      </Preview>
+
+      <Preview
+        lead="Standing in for the spinner in a reasoning, task and message stream."
+        title="AI agent"
+      >
+        <AgentPreview inlineMap={inlineMap} logo={logo} />
+      </Preview>
+
+      <Preview lead="Click one to watch the icon morph." title="Loaders">
+        <LoadersPreview inlineMap={inlineMap} logo={logo} />
+      </Preview>
+    </>
   );
 }

@@ -20,7 +20,7 @@ export function Panel({
       <h2 className="border-border border-b bg-muted px-4 py-2 font-medium text-sm">
         {title}
       </h2>
-      <div className="flex flex-col gap-4 px-4 py-4">{children}</div>
+      <div className="flex flex-col gap-6 px-4 py-5">{children}</div>
     </section>
   );
 }
@@ -110,7 +110,7 @@ export function Segmented<T extends string>({
   return (
     <Field label={label}>
       <ToggleGroup
-        className="justify-start"
+        className="flex-wrap justify-start"
         onValueChange={(next) => {
           const picked = next[0] as T | undefined;
           if (picked) {
@@ -158,16 +158,6 @@ export function Toggle({
         className="mt-0.5 shrink-0"
         onCheckedChange={onChange}
       />
-    </div>
-  );
-}
-
-/** One measurement in the readout strip under the stage. */
-export function Stat({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="px-3 py-2.5">
-      <div className="text-muted-foreground text-xs">{label}</div>
-      <div className="mt-1 font-mono text-sm tabular-nums">{value}</div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { Link } from "react-router";
 
 import { Container } from "@/components/container";
 import { DesktopNav } from "@/components/desktop-nav";
+import { GithubIcon } from "@/components/icons/github-icon";
 import { Logo } from "@/components/logo";
 import { MobileNav } from "@/components/mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -29,20 +30,26 @@ export function Header() {
           <DesktopNav />
         </div>
 
-        <div className="flex items-center gap-1">
+        {/*
+          Icon buttons carry their own padding, so their glyphs would sit inset
+          from the container edge while the logo starts flush against it. The
+          negative margin pulls the cluster back out to align optically.
+        */}
+        <div className="-mr-2 flex items-center gap-1">
           <Button
-            className="hidden md:inline-flex"
+            nativeButton={false}
             render={
               <a
-                aria-label="GitHub"
+                aria-label="benday on GitHub"
                 href={REPO}
                 rel="noreferrer"
                 target="_blank"
               />
             }
+            size="icon"
             variant="ghost"
           >
-            GitHub
+            <GithubIcon />
           </Button>
           <ThemeToggle />
           <MobileNav />

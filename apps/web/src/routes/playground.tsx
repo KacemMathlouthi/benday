@@ -6,23 +6,22 @@ import { Container } from "@/components/container";
 import { PageHeader } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { BakePanel } from "@/playground/components/bake-panel";
-import { PresetPicker } from "@/playground/components/preset-picker";
 import { RenderPanel } from "@/playground/components/render-panel";
-import { SourcePicker } from "@/playground/components/source-picker";
 import { Stage } from "@/playground/components/stage";
-import { UsagePanel } from "@/playground/components/usage-panel";
+import { UsageDialog } from "@/playground/components/usage-dialog";
+import { Warnings } from "@/playground/components/warnings";
 import { useFileDrop } from "@/playground/hooks/use-file-drop";
 import { buildSnippet } from "@/playground/lib/snippet";
+import type { Source } from "@/playground/lib/source";
+import { DEFAULT_SOURCE } from "@/playground/lib/source";
 import type { BakeState, RenderState } from "@/playground/lib/state";
 import {
   DEFAULT_BAKE_STATE,
   DEFAULT_RENDER_STATE,
 } from "@/playground/lib/state";
-import type { Sample } from "@/playground/samples";
-import { SAMPLES } from "@/playground/samples";
 
 export function Playground() {
-  const [source, setSource] = useState<Sample>(SAMPLES[0]);
+  const [source, setSource] = useState<Source>(DEFAULT_SOURCE);
   const [bake, setBake] = useState<BakeState>(DEFAULT_BAKE_STATE);
   const [render, setRender] = useState<RenderState>(DEFAULT_RENDER_STATE);
 
@@ -51,14 +50,11 @@ export function Playground() {
     [bake]
   );
 
-  const { dotMap, loading, error, elapsed } = useDotMap(
-    source.src,
-    bakeOptions
-  );
+  const { dotMap, loading, error } = useDotMap(source.src, bakeOptions);
   const snippet = useMemo(() => buildSnippet(bake, render), [bake, render]);
 
   return (
-    <Container className="pb-20" size="wide">
+    <Container className="pb-20">
       {dragging && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="border border-border border-dashed px-10 py-8 text-sm">
@@ -68,12 +64,31 @@ export function Playground() {
       )}
 
       <PageHeader
-        lead="Drop a logo anywhere on the page, tune the bake until the mark still reads at 20px, then take the snippet or the baked JSON with you."
+        aside={
+          // The source artwork, as it went in. It sits beside the title rather
+          // than on the stage so the stage only ever shows dots.
+          <figure className="flex flex-col items-center gap-2">
+            <div className="flex size-28 items-center justify-center bg-muted p-3">
+              <img
+                alt={`${source.label} source artwork`}
+                className="max-h-full max-w-full object-contain dark:invert"
+                src={source.src}
+              />
+            </div>
+            <figcaption className="block max-w-28 truncate text-muted-foreground text-xs">
+              {source.label}
+            </figcaption>
+          </figure>
+        }
+        lead="Drop a logo anywhere on the page, then tune the bake until the mark still reads at 20px."
         title="Playground"
       >
-        <Button onClick={() => fileInput.current?.click()} variant="outline">
-          Upload a logo
-        </Button>
+        <div className="flex items-center gap-2">
+          <UsageDialog snippet={snippet} />
+          <Button onClick={() => fileInput.current?.click()} variant="outline">
+            Upload a logo
+          </Button>
+        </div>
         <input
           accept="image/*"
           className="sr-only"
@@ -89,30 +104,24 @@ export function Playground() {
         />
       </PageHeader>
 
-      <div className="grid grid-cols-1 gap-4 border-border border-t pt-8 lg:grid-cols-[1fr_300px]">
+      {/* Controls first in the DOM as well as on screen, so reading order
+          matches the order the settings are applied in. */}
+      <div className="grid grid-cols-1 gap-4 border-border border-t pt-8 lg:grid-cols-[300px_1fr]">
         <div className="flex min-w-0 flex-col gap-4">
-          <Stage
-            dotMap={dotMap}
-            error={error}
-            loading={loading}
-            patch={patchRender}
-            render={render}
-            source={source}
-          />
-          <PresetPicker dotMap={dotMap} patch={patchRender} render={render} />
-          <SourcePicker onSelect={setSource} source={source} />
-          <UsagePanel
-            dotMap={dotMap}
-            elapsed={elapsed}
-            render={render}
-            snippet={snippet}
-            sourceId={source.id}
-          />
+          <BakePanel bake={bake} patch={patchBake} />
+          <RenderPanel dotMap={dotMap} patch={patchRender} render={render} />
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <BakePanel bake={bake} patch={patchBake} />
-          <RenderPanel patch={patchRender} render={render} />
+          <Stage
+            bakeOptions={bakeOptions}
+            dotMap={dotMap}
+            error={error}
+            loading={loading}
+            render={render}
+            src={source.src}
+          />
+          <Warnings dotMap={dotMap} render={render} />
         </div>
       </div>
     </Container>

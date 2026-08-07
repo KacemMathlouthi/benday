@@ -22,21 +22,30 @@ export function Home() {
 
   return (
     <Container>
-      <section className="flex flex-col items-center py-16 text-center sm:py-24">
-        <h1 className="font-medium text-4xl tracking-tight sm:text-5xl">
-          benday
-        </h1>
-
-        <div className="my-10 flex h-50 items-center justify-center">
+      {/* The header is sticky but still occupies its 3.5rem of flow, so a plain
+          100svh section would hang past the fold and centre everything low. */}
+      <section className="flex min-h-[calc(100svh-3.5rem)] flex-col items-center justify-center py-12 text-center">
+        <div className="flex items-center gap-4 sm:gap-5">
           <ThinkingLogo
             preset="contour"
-            size={200}
+            size={92}
             src={DEFAULT_SHOWCASE.logo}
             state="thinking"
           />
+          <h1 className="font-medium text-5xl tracking-tight sm:text-6xl">
+            benday
+          </h1>
         </div>
 
-        <p className="max-w-xl text-balance text-muted-foreground leading-relaxed">
+        {/* The art is white dots on true black — which is exactly the dark
+            palette. Light mode inverts it to black dots on white. */}
+        <img
+          alt="A stippled figure standing on a field of dots, trailing the grid behind it"
+          className="mt-8 w-full max-w-xl invert dark:invert-0"
+          src="/hero-field.png"
+        />
+
+        <p className="mt-8 w-full max-w-2xl text-balance text-muted-foreground leading-relaxed">
           Agents need somewhere to say they are thinking. Shimmering text, dot
           matrices and orbs all fill that slot with something generic. benday
           fills it with{" "}

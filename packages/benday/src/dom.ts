@@ -108,10 +108,15 @@ export function watchPaintability(
   };
 }
 
-/** Device pixel ratio, capped — beyond 2 the extra pixels buy nothing here. */
-export function devicePixelRatioCapped(max = 2): number {
-  if (typeof devicePixelRatio === "undefined") {
-    return 1;
-  }
-  return Math.min(max, devicePixelRatio || 1);
+/**
+ * Device pixel ratio for the backing store, capped.
+ *
+ * Small indicators are all edge: a 20px mark is a few dozen sub-2px discs, and
+ * their curvature is exactly what the rasteriser has least room to describe. So
+ * the floor is 2 even on a 1× display — supersampling a 20px canvas costs
+ * 1600 pixels and visibly cleans up the antialiasing.
+ */
+export function devicePixelRatioCapped(max = 3, min = 2): number {
+  const ratio = typeof devicePixelRatio === "undefined" ? 1 : devicePixelRatio;
+  return Math.min(max, Math.max(min, ratio || 1));
 }

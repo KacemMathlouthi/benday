@@ -1,4 +1,4 @@
-import type { DotShape } from "benday";
+import type { DotMap, DotShape } from "benday";
 
 import { cn } from "@/lib/utils";
 import {
@@ -7,6 +7,7 @@ import {
   Slider,
   Toggle,
 } from "@/playground/components/controls";
+import { PresetPicker } from "@/playground/components/preset-picker";
 import { round } from "@/playground/lib/snippet";
 import type { Patch, RenderState } from "@/playground/lib/state";
 import { COLORS } from "@/playground/lib/state";
@@ -18,14 +19,17 @@ const SHAPES: { value: DotShape; label: string }[] = [
 ];
 
 export function RenderPanel({
+  dotMap,
   render,
   patch,
 }: {
+  dotMap: DotMap | null;
   render: RenderState;
   patch: Patch<RenderState>;
 }) {
   return (
     <Panel title="Render">
+      <PresetPicker dotMap={dotMap} patch={patch} render={render} />
       <Slider
         format={(v) => `${v}px`}
         label="Size"

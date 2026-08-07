@@ -1,4 +1,4 @@
-import type { DotShape, MaskMode, PresetName, ThinkingState } from "benday";
+import type { DotShape, MaskMode, PresetName } from "benday";
 
 /** Everything that feeds the bake step. */
 export interface BakeState {
@@ -11,10 +11,13 @@ export interface BakeState {
   trim: boolean;
 }
 
-/** Everything that feeds the renderer. */
+/**
+ * Everything that feeds the renderer. `state` and `paused` are deliberately
+ * absent: the playground always previews the thinking animation, since that is
+ * the only state worth tuning against.
+ */
 export interface RenderState {
   preset: PresetName;
-  state: ThinkingState;
   size: number;
   fitNatural: boolean;
   speed: number;
@@ -24,7 +27,6 @@ export interface RenderState {
   weight: number;
   padding: number;
   color: string;
-  paused: boolean;
 }
 
 export const DEFAULT_BAKE_STATE: BakeState = {
@@ -43,12 +45,10 @@ export const DEFAULT_RENDER_STATE: RenderState = {
   fitNatural: false,
   glow: 0,
   padding: 0.06,
-  paused: false,
-  preset: "contour",
+  preset: "shimmer",
   shape: "circle",
-  size: 200,
+  size: 256,
   speed: 1,
-  state: "thinking",
   weight: 0.5,
 };
 

@@ -15,18 +15,20 @@ const externalLinks = [
 ];
 
 export function Footer() {
+
   return (
     <footer className="mt-auto border-border border-t">
       <Container>
         <div className="flex flex-col gap-6 py-6">
           <div className="flex items-center justify-between">
             <Logo />
-            <div className="flex items-center">
+            {/* Matches the header: pull the icon out to the container edge. */}
+            <div className="-mr-2 flex items-center">
               <Button
                 nativeButton={false}
                 render={
                   <a
-                    aria-label="GitHub"
+                    aria-label="benday on GitHub"
                     href={REPO}
                     rel="noreferrer"
                     target="_blank"

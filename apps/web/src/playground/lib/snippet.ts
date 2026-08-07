@@ -43,9 +43,6 @@ export function buildSnippet(bake: BakeState, render: RenderState): string {
     props.push(`bake={{ ${bakeProps.join(", ")} }}`);
   }
   props.push(`preset="${render.preset}"`);
-  if (render.state !== r.state) {
-    props.push(`state="${render.state}"`);
-  }
   // 64 is the component default, not the playground's starting size.
   if (render.size !== 64) {
     props.push(`size={${render.size}}`);
