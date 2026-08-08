@@ -1,10 +1,7 @@
 import type { DotMap } from "@/components/ui/benday";
 import type { RenderState } from "@/playground/lib/state";
 
-/**
- * Effective dot diameter at the current size. This is the number that decides
- * whether a grid setting survives at 20px or turns into grey fuzz.
- */
+/** Effective dot diameter — what decides whether a grid survives at 20px. */
 function dotDiameter(dotMap: DotMap, render: RenderState): number {
   const available = render.size * (1 - render.padding * 2);
   return (available / Math.max(dotMap.cols, dotMap.rows)) * render.dotScale;

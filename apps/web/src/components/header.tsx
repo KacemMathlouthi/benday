@@ -30,11 +30,8 @@ export function Header() {
           <DesktopNav />
         </div>
 
-        {/*
-          Icon buttons carry their own padding, so their glyphs would sit inset
-          from the container edge while the logo starts flush against it. The
-          negative margin pulls the cluster back out to align optically.
-        */}
+        {/* Icon buttons pad their own glyphs inset from the container edge;
+            the negative margin pulls the cluster back out to align. */}
         <div className="-mr-2 flex items-center gap-1">
           <Button
             nativeButton={false}

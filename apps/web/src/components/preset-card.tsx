@@ -3,9 +3,8 @@ import type { PresetName } from "@/components/ui/benday/types";
 import type { ShowcaseSettings } from "@/lib/showcase";
 
 /**
- * One cell of the bento grid: the mark running a single preset, named and
- * described underneath. Every card is the same size so the grid reads as a
- * comparison rather than a hierarchy.
+ * One grid cell: the mark running a single preset, named underneath. Every card
+ * is the same size, so the grid reads as a comparison, not a hierarchy.
  */
 export function PresetCard({
   preset,

@@ -1,7 +1,4 @@
-/**
- * DOM plumbing shared by the renderer. None of this is framework-specific —
- * keeping it here is what lets the React wrapper stay a thin shell.
- */
+/** Framework-agnostic DOM plumbing; what keeps the React wrapper a thin shell. */
 
 const noop = () => {
   // no environment to observe
@@ -9,10 +6,7 @@ const noop = () => {
 
 const canObserve = typeof window !== "undefined";
 
-/**
- * A canvas cannot inherit `currentColor`, so resolve it against the element's
- * computed style. Any other value passes through untouched.
- */
+/** A canvas cannot inherit `currentColor`; resolve it off the computed style. */
 export function resolveInk(canvas: HTMLCanvasElement, color: string): string {
   if (color !== "currentColor") {
     return color;
@@ -21,9 +15,8 @@ export function resolveInk(canvas: HTMLCanvasElement, color: string): string {
 }
 
 /**
- * Fires whenever the ambient theme could have changed — OS preference, or a
- * `class`/`data-theme` flip anywhere up the tree (the Tailwind / shadcn
- * convention). The callback should re-resolve `currentColor`.
+ * Fires when the ambient theme could have changed: OS preference, or a
+ * `class`/`data-theme` flip up the tree. Re-resolve `currentColor` on it.
  */
 export function watchTheme(onChange: () => void): () => void {
   if (!canObserve) {
@@ -66,9 +59,8 @@ export function watchReducedMotion(
 }
 
 /**
- * Reports whether the element is worth painting: on screen *and* in a visible
- * tab. An indicator scrolled out of view or sitting in a background tab should
- * cost nothing.
+ * Whether the element is worth painting: on screen and in a visible tab. Off
+ * either one, the indicator should cost nothing.
  */
 export function watchPaintability(
   element: Element,
@@ -109,12 +101,8 @@ export function watchPaintability(
 }
 
 /**
- * Device pixel ratio for the backing store, capped.
- *
- * Small indicators are all edge: a 20px mark is a few dozen sub-2px discs, and
- * their curvature is exactly what the rasteriser has least room to describe. So
- * the floor is 2 even on a 1× display — supersampling a 20px canvas costs
- * 1600 pixels and visibly cleans up the antialiasing.
+ * Backing-store pixel ratio, capped. The floor is 2 even on a 1× display: small
+ * marks are all edge, and supersampling a 20px canvas is 1600 cheap pixels.
  */
 export function devicePixelRatioCapped(max = 3, min = 2): number {
   const ratio = typeof devicePixelRatio === "undefined" ? 1 : devicePixelRatio;

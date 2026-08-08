@@ -30,12 +30,8 @@ function Field({
 }
 
 /**
- * One control bar for the whole grid. Every preview below reads these, so the
- * cards stay a like-for-like comparison of the presets themselves.
- *
- * The three sliders share a row and the two pickers share the next one. An
- * earlier four-column layout put the shape toggles and the colour swatches
- * into quarter-width cells, which they overflowed.
+ * One control bar for the whole grid, so the cards stay a like-for-like
+ * comparison. Sliders share a row; four columns overflowed the pickers.
  */
 export function ShowcaseControls({
   settings,

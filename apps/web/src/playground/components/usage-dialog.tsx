@@ -10,10 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-/**
- * The playground's code hand-off. It lives behind a dialog rather than under
- * the stage so the settings and the preview keep the whole page between them.
- */
+/** The code hand-off, behind a dialog so settings and preview keep the page. */
 export function UsageDialog({ snippet }: { snippet: string }) {
   return (
     <Dialog>

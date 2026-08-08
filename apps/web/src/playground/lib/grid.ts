@@ -1,21 +1,14 @@
 import type { RenderState } from "@/playground/lib/state";
 
-/**
- * The smallest dot that still reads as a dot, in CSS pixels. Below roughly this
- * the canvas antialiases the disc into a grey smudge and the mark turns to fuzz.
- */
+/** The smallest dot that still reads as one; below it the disc goes to smudge. */
 const MIN_DOT_PX = 0.5;
 
 /** Coarsest grid worth baking — below this a logo stops being recognisable. */
 const MIN_GRID = 3;
 
 /**
- * The largest grid whose dots still clear {@link MIN_DOT_PX} at `size`.
- *
- * Dot count is fixed by the bake, not by the canvas, so a 24-dot map drawn at
- * 20px puts ~0.45px of ink in each cell no matter how many device pixels back
- * it. Rendering small sharply means baking a second, coarser map — this is the
- * grid to bake it at. It only ever coarsens: `maxGrid` is the ceiling.
+ * The largest grid still clearing {@link MIN_DOT_PX} at `size`. Dot count comes
+ * from the bake, not the canvas, so small sizes need their own coarser map.
  */
 export function gridForSize(
   size: number,

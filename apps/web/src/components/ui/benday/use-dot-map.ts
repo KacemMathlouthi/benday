@@ -22,9 +22,8 @@ const IDLE: UseDotMapResult = {
 const LOADING: UseDotMapResult = { ...IDLE, loading: true };
 
 /**
- * Bake a source into a {@link DotMap}, re-running when the source or options
- * change. String sources go through the module-level cache; Blobs and Files are
- * baked fresh, since they have no stable identity to key on.
+ * Bake a source into a {@link DotMap}, re-running on change. Strings hit the
+ * module cache; Blobs and Files bake fresh, having no stable identity.
  */
 export function useDotMap(
   source: BakeSource | null | undefined,
@@ -32,9 +31,8 @@ export function useDotMap(
 ): UseDotMapResult {
   const optionsKey = JSON.stringify(options);
 
-  // A string source plus its options fully determines the result, so the pair
-  // can key the effect directly. Anything else falls back to reference
-  // identity, which is the best a Blob or a live <img> can offer.
+  // A string plus its options determines the result, so the pair keys the
+  // effect. Anything else falls back to reference identity.
   const signature =
     typeof source === "string" ? `${source}|${optionsKey}` : source;
 

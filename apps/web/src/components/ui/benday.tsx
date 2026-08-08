@@ -35,12 +35,8 @@ const STATE_LABEL: Record<BendayState, string> = {
 };
 
 /**
- * A canvas indicator built from your logo.
- *
- * All the moving parts live in the framework-agnostic renderer; this component
- * only owns the element, the bake, and the flow of props. Prop changes go in
- * through `renderer.update()` rather than by recreating anything, so the
- * animation never restarts mid-flight.
+ * A canvas indicator built from your logo. This owns only the element, the bake
+ * and the props; `renderer.update()` takes changes without restarting anything.
  */
 export function Benday({
   src,

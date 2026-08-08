@@ -2,10 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import type { Source } from "@/playground/lib/source";
 
-/**
- * Whole-window drag-and-drop for image files. Reads to a data URI so the
- * dropped file becomes an ordinary cacheable string source.
- */
+/** Whole-window image drop, read to a data URI so it is a cacheable string. */
 export function useFileDrop(onFile: (source: Source) => void) {
   const [dragging, setDragging] = useState(false);
 

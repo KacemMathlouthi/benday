@@ -5,10 +5,7 @@ export interface Source {
   src: string;
 }
 
-/**
- * The one source the playground starts from. Everything else arrives by upload
- * or drop, so there is no sample picker to work through.
- */
+/** The one source it starts from; everything else arrives by upload or drop. */
 export const DEFAULT_SOURCE: Source = {
   id: "benday-mark",
   label: "benday mark",

@@ -12,9 +12,8 @@ export interface BakeState {
 }
 
 /**
- * Everything that feeds the renderer. `state` and `paused` are deliberately
- * absent: the playground always previews the thinking animation, since that is
- * the only state worth tuning against.
+ * Everything that feeds the renderer. No `state` or `paused`: thinking is the
+ * only state worth tuning against, so the playground always previews it.
  */
 export interface RenderState {
   preset: PresetName;

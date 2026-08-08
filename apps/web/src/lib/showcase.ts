@@ -12,11 +12,11 @@ export interface ShowcaseSettings {
 
 export const DEFAULT_SHOWCASE: ShowcaseSettings = {
   color: "currentColor",
-  dotScale: 0.62,
+  dotScale: 0.65,
   logo: "/benday-mark.svg",
   shape: "circle",
-  size: 120,
-  speed: 1,
+  size: 128,
+  speed: 1.25,
 };
 
 export const SHOWCASE_COLORS = [

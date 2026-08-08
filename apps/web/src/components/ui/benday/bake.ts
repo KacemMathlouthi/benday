@@ -39,10 +39,6 @@ function stripUndefined<T extends object>(o: T): Partial<T> {
   return out;
 }
 
-/* ------------------------------------------------------------------ *
- * Image loading
- * ------------------------------------------------------------------ */
-
 export type BakeSource = string | Blob | HTMLImageElement | ImageBitmap;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -60,11 +56,8 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Rasterize the source at `workingSize` (longest side) into ImageData.
- *
- * SVGs are drawn straight at the target size — the vector rasterizes cleanly
- * at whatever scale, so there is no need for the intermediate 4096px pass a
- * texture-based pipeline would want.
+ * Rasterize at `workingSize` (longest side). SVGs go straight to the target
+ * size — vectors rasterize cleanly at any scale, so no intermediate pass.
  */
 async function rasterize(
   source: BakeSource,
@@ -138,10 +131,6 @@ async function rasterize(
   }
 }
 
-/* ------------------------------------------------------------------ *
- * Mask building
- * ------------------------------------------------------------------ */
-
 const luma = (r: number, g: number, b: number) =>
   (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 
@@ -160,11 +149,8 @@ function hasAlpha(px: Uint8ClampedArray): boolean {
 }
 
 /**
- * Continuous ink coverage per pixel, 0 = background, 1 = solid ink.
- *
- * Alpha mode is the easy case. Luma mode is what makes JPEGs and flattened
- * PNGs work: sample the four corners for the background level, then measure
- * how far each pixel departs from it.
+ * Ink coverage per pixel, 0 = background, 1 = solid ink. Luma mode reads the
+ * corners for a background level, then measures each pixel's departure.
  */
 function buildCoverage(
   img: ImageData,
@@ -257,10 +243,6 @@ function dilateCoverage(
   return out;
 }
 
-/* ------------------------------------------------------------------ *
- * Exact Euclidean distance transform (Felzenszwalb & Huttenlocher)
- * ------------------------------------------------------------------ */
-
 const INF = 1e20;
 
 /** 1D squared distance transform of a sampled function, in place-ish. */
@@ -297,11 +279,8 @@ function edt1d(
 }
 
 /**
- * Distance (in working pixels) from every inside pixel to the nearest outside
- * pixel. This replaces the Poisson solve a shader pipeline would use: it is
- * O(n), needs no iteration count, and gives a true distance rather than a
- * smoothed proxy — which is exactly what dot animations want for ordering a
- * ripple from the outline inward.
+ * Exact distance from each inside pixel to the nearest outside one, after
+ * Felzenszwalb & Huttenlocher: O(n), and true distance a ripple can order by.
  */
 function distanceTransform(
   mask: Uint8Array,
@@ -351,10 +330,6 @@ function distanceTransform(
   return { dist, max };
 }
 
-/* ------------------------------------------------------------------ *
- * Bake
- * ------------------------------------------------------------------ */
-
 interface ContentBounds {
   minX: number;
   minY: number;
@@ -373,10 +348,7 @@ function resolveMaskMode(
   return hasAlpha(pixels) ? "alpha" : "luma";
 }
 
-/**
- * Bounding box of everything with meaningful ink. Falls back to the full frame
- * when trimming is off or the image turned out empty.
- */
+/** Bounding box of the ink; the full frame if trimming is off or it is empty. */
 function findContentBounds(
   cov: Float32Array,
   width: number,
@@ -413,10 +385,7 @@ function findContentBounds(
   };
 }
 
-/**
- * Average coverage and peak depth per grid cell, keeping the cells that clear
- * the threshold.
- */
+/** Mean coverage and peak depth per cell, keeping those over the threshold. */
 function sampleDots(
   cov: Float32Array,
   dist: Float32Array,
@@ -475,9 +444,8 @@ function sampleDots(
 }
 
 /**
- * Rescale depth against the deepest *sampled* dot rather than the deepest
- * pixel. A hairline wordmark has a tiny absolute max distance; normalizing
- * globally would flatten `d` to zero and leave depth-driven presets inert.
+ * Normalize against the deepest sampled dot, not the deepest pixel: a hairline
+ * mark would otherwise flatten `d` to zero and leave depth presets inert.
  */
 function normalizeDepth(dots: Dot[]): void {
   let maxDepth = 0;
@@ -490,10 +458,8 @@ function normalizeDepth(dots: Dot[]): void {
 }
 
 /**
- * Turn an image into a {@link DotMap}.
- *
- * Browser-only — it rasterizes through a canvas. Run it at build time and ship
- * the JSON, or at runtime when you want drop-in-any-logo behavior.
+ * Turn an image into a {@link DotMap}. Browser-only: it goes via a canvas. Run
+ * it at build time and ship the JSON, or at runtime for any-logo drop-in.
  */
 export async function bake(
   source: BakeSource,
@@ -548,10 +514,6 @@ export async function bake(
     rows,
   };
 }
-
-/* ------------------------------------------------------------------ *
- * Cache
- * ------------------------------------------------------------------ */
 
 const cache = new Map<string, Promise<DotMap>>();
 

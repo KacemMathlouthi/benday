@@ -13,11 +13,8 @@ const LogoIcon = (props: React.ComponentProps<"svg">) => (
   </svg>
 );
 
-/*
- * Geist Pixel ships a single weight, so `font-medium` here would only ask the
- * browser to synthesise a bold and smear the pixel grid. Weight comes from the
- * face; presence comes from the size.
- */
+/* Geist Pixel ships one weight: `font-medium` would only get a synthesised
+   bold that smears the pixel grid. Presence comes from the size instead. */
 export const Logo = ({ className, ...props }: React.ComponentProps<"div">) => (
   <div className={`flex items-center gap-2 ${className ?? ""}`} {...props}>
     <LogoIcon className="size-6" />

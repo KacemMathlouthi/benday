@@ -4,10 +4,7 @@ import { Slider as SliderPrimitive } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-/**
- * A group of controls. The rule and the label carry the grouping; there is no
- * card, so the panel reads as part of the page rather than a floating box.
- */
+/** A control group: a rule and a label, no card, so it reads as page not box. */
 export function Panel({
   title,
   children,

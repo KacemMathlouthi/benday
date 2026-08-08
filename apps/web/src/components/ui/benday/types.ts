@@ -15,9 +15,8 @@ export interface Dot {
 }
 
 /**
- * The baked representation of a logo: a grid of dots plus the geometry needed
- * to lay them out. This is the only thing the renderer needs — it is small,
- * JSON-serializable, and can be produced at build time.
+ * A baked logo: dots plus the geometry to lay them out. All the renderer needs,
+ * small and JSON-serializable, so it can be produced at build time.
  */
 export interface DotMap {
   /** Grid columns across the trimmed content box. */
@@ -43,18 +42,11 @@ export interface BakeOptions {
   threshold?: number;
   /** Gamma applied to coverage before thresholding. <1 boosts faint ink. @default 1 */
   gamma?: number;
-  /**
-   * How to separate ink from background.
-   * `auto` uses alpha when the image has any transparency, luminance otherwise.
-   * @default 'auto'
-   */
+  /** How to separate ink from background; `auto` picks alpha over luma. @default 'auto' */
   maskMode?: MaskMode;
   /** Treat the luminance mask as inverted (light ink on dark). Only used in luma mode. */
   invert?: boolean;
-  /**
-   * Grow the mask by this many working-resolution pixels before sampling.
-   * The rescue knob for hairline strokes and thin wordmarks. @default 0
-   */
+  /** Grow the mask by N working pixels — the hairline rescue knob. @default 0 */
   dilate?: number;
   /** Trim to the mask's bounding box before gridding. @default true */
   trim?: boolean;
@@ -131,11 +123,7 @@ export interface RendererOptions {
   state?: BendayState;
   /** Rendered size in CSS pixels. @default 64 */
   size?: number;
-  /**
-   * `square` keeps a size×size box and fits the mark inside. `natural` sizes
-   * the canvas to the mark's aspect ratio, which wide wordmarks need.
-   * @default 'square'
-   */
+  /** `natural` sizes the canvas to the mark's aspect, which wordmarks need. @default 'square' */
   fit?: Fit;
   /** Animation speed multiplier. @default 1 */
   speed?: number;
@@ -153,10 +141,7 @@ export interface RendererOptions {
   weight?: number;
   /** Freeze on the current frame. @default false */
   paused?: boolean;
-  /**
-   * `auto` follows the `prefers-reduced-motion` media query and re-checks it
-   * live. `true`/`false` pin the behavior. @default 'auto'
-   */
+  /** `auto` follows prefers-reduced-motion live; a boolean pins it. @default 'auto' */
   reducedMotion?: boolean | "auto";
 }
 
@@ -167,9 +152,8 @@ export type ResolvedRendererOptions = Required<
 };
 
 /**
- * A live canvas painter. Created once per canvas; feed it new options with
- * {@link Renderer.update} rather than recreating it, so the animation clock and
- * settle spring survive prop changes.
+ * A live canvas painter. Update it rather than recreating it, so the clock and
+ * the settle spring survive prop changes.
  */
 export interface Renderer {
   /** Merge new options in and repaint. Unspecified keys keep their value. */

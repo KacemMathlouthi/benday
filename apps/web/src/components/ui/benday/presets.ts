@@ -1,9 +1,5 @@
 import type { DotFrame, Preset, PresetName } from "./types";
 
-/* ------------------------------------------------------------------ *
- * Small math helpers
- * ------------------------------------------------------------------ */
-
 const fract = (v: number) => v - Math.floor(v);
 /** Signed wrapped difference in a 0..1 cyclic space, -0.5..0.5. */
 const cyclicDelta = (v: number) => {
@@ -33,12 +29,8 @@ function noise2(x: number, y: number): number {
   return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
 }
 
-/* ------------------------------------------------------------------ *
- * Presets
- *
- * Each writes into a reused `out` object — a preset runs once per dot per
- * frame, so allocating there would churn the heap at 60fps × 500 dots.
- * ------------------------------------------------------------------ */
+/* Each preset writes into a reused `out` — it runs once per dot per frame, so
+   allocating there would churn the heap at 60fps × 500 dots. */
 
 /** A lit band sweeps the mark on the diagonal — the shimmer-text idiom, in dots. */
 const shimmer: Preset = (c, t, out) => {

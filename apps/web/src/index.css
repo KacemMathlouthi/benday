@@ -4,16 +4,8 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 
-/*
- * Geist Pixel, used for the wordmark only.
- *
- * The family is variable on one axis, ELSH ("element shape"), which morphs the
- * pixel between square (1), circle (20), grid (40) and triangle (60). That
- * variable file is 3.6MB because every axis stop carries its own outlines, and
- * we only ever want one stop — so the static Circle instance ships instead and
- * `font-pixel-circle` is the only utility. Swapping shapes means swapping the
- * face, not setting `font-variation-settings`.
- */
+/* Geist Pixel's variable ELSH file is 3.6MB for four pixel shapes, so only the
+   static Circle instance ships. Other shapes mean another face, not an axis. */
 @font-face {
   font-family: "Geist Pixel Circle";
   font-style: normal;
@@ -22,9 +14,8 @@
   src: url("./fonts/GeistPixel-Circle.woff2") format("woff2");
 }
 
-/* Streamdown ships its markdown styles as classes in its own dist, which
-   Tailwind will not see unless it is told to scan them. Required by the
-   ai-elements Message/Response components. */
+/* Streamdown's markdown classes live in its dist; Tailwind must be told to
+   scan them. Required by the ai-elements Message/Response components. */
 @source "../node_modules/streamdown/dist/*.js";
 
 @custom-variant dark (&:is(.dark *));
@@ -75,12 +66,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/*
- * Vercel's Geist gray ramp, verbatim. The hex each token corresponds to is in
- * the comment so a value can be checked against Geist rather than eyeballed.
- * Everything is chroma 0: the page is monochrome, and the only colour on it is
- * whatever colour the dots have been set to.
- */
+/* Vercel's Geist gray ramp, verbatim — the hex is noted so a value can be
+   checked, not eyeballed. Chroma 0 throughout: only the dots carry colour. */
 :root {
   --background: oklch(1 0 0); /* #ffffff */
   --foreground: oklch(0.2178 0 0); /* #171717 gray-1000 */
@@ -167,17 +154,8 @@
   }
 }
 
-/*
-  Icon swap — transitions.dev
-
-    <span class="t-icon-swap" data-state="a">
-      <span class="t-icon" data-icon="a">…</span>
-      <span class="t-icon" data-icon="b">…</span>
-    </span>
-
-  Both icons occupy the same grid cell, so the swap costs no layout. The
-  outgoing one blurs and shrinks away while the incoming one resolves.
-*/
+/* Icon swap (transitions.dev): .t-icon-swap[data-state] over two .t-icon[data-icon]
+   children. Both share one grid cell, so the swap costs no layout. */
 :root {
   --icon-swap-dur: 250ms;
   --icon-swap-blur: 2px;

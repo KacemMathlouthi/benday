@@ -2,10 +2,7 @@ import type React from "react";
 
 import { cn } from "@/lib/utils";
 
-/**
- * The page-defining title plus one short orientation passage. Every route opens
- * with exactly one of these, so the first screenful reads the same everywhere.
- */
+/** The page title and its one orientation passage. Every route opens with one. */
 export function PageHeader({
   title,
   lead,
@@ -34,10 +31,7 @@ export function PageHeader({
   );
 }
 
-/**
- * A section turn. The rule spans the reading column rather than boxing the
- * content, so hierarchy comes from spacing and type instead of from cards.
- */
+/** A section turn: a rule across the column, so hierarchy is spacing, not cards. */
 export function Section({
   title,
   lead,

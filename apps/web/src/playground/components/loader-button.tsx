@@ -13,11 +13,8 @@ const WORK_MS = 2600;
 const ICON_PX = 18;
 
 /**
- * A button whose lucide icon morphs into the thinking dots while it works.
- *
- * The swap is the `t-icon-swap` transition from index.css: both glyphs sit in
- * one grid cell, so the outgoing one can blur and shrink out of the way without
- * the label moving a pixel.
+ * A button whose icon morphs into the thinking dots while it works, via
+ * `t-icon-swap`: both glyphs share one cell, so the label never moves.
  */
 export function LoaderButton({
   icon: Icon,

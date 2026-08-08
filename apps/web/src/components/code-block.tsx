@@ -9,10 +9,7 @@ import {
 } from "@/components/ai-elements/code-block";
 import { cn } from "@/lib/utils";
 
-/**
- * The site's one code surface: shiki highlighting from ai-elements, wrapped so
- * every snippet on every page carries the same filename bar and copy button.
- */
+/** The site's one code surface: shiki, plus a filename bar and copy button. */
 export function CodeBlock({
   code,
   filename,
@@ -30,10 +27,8 @@ export function CodeBlock({
     <AiCodeBlock
       className={cn(
         "rounded-none",
-        // shiki paints the github-light/github-dark canvas onto the <pre> as an
-        // inline style. Left alone it puts a #24292e slab on a pure black page,
-        // so the surface is forced back to the site's own background and only
-        // the token colours are kept.
+        // shiki inlines its own canvas onto the <pre>, a #24292e slab on a black
+        // page. Force the surface back and keep only the token colours.
         "[&_pre]:!bg-transparent [&_pre_span]:!bg-transparent",
         className
       )}

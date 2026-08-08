@@ -45,12 +45,8 @@ const DERIVED_KEYS = ["dotMap", "weight"] as const;
 const LAYOUT_KEYS = ["dotMap", "size", "fit", "padding", "dotScale"] as const;
 
 /**
- * Paint a {@link DotMap} onto a canvas and animate it.
- *
- * Create one per canvas and feed it new options through {@link Renderer.update}.
- * The animation clock and the settle spring live inside the renderer, so
- * changing props never restarts the motion — which is exactly what a React
- * effect re-run would otherwise do.
+ * Paint a {@link DotMap} onto a canvas and animate it. One per canvas, updated
+ * through {@link Renderer.update}: the clock lives here, so props never restart it.
  */
 export function createRenderer(
   canvas: HTMLCanvasElement,
@@ -67,7 +63,7 @@ export function createRenderer(
     ...strip(initial),
   };
 
-  // ----- caches, rebuilt only when their inputs change ----- //
+  // Caches, rebuilt only when their inputs change.
   let dots: DotContext[] = [];
   let weights: number[] = [];
   let ink = "#000";
@@ -78,7 +74,7 @@ export function createRenderer(
   let originY = 0;
   let baseRadius = 0;
 
-  // ----- animation state, deliberately outliving update() ----- //
+  // Animation state, deliberately outliving update().
   let clock = 0;
   let settle = 1;
   let velocity = 0;

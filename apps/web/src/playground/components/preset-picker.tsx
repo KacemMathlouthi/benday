@@ -9,10 +9,7 @@ import {
 } from "@/components/ui/select";
 import type { Patch, RenderState } from "@/playground/lib/state";
 
-/**
- * The preset control. Each option animates the current bake at thumbnail size,
- * so the list is a set of previews rather than seven words to guess between.
- */
+/** Each option animates the current bake, so the list is previews, not words. */
 export function PresetPicker({
   dotMap,
   render,

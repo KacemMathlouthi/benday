@@ -32,9 +32,8 @@ function Caption({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * A map baked at a grid `size` can actually resolve. Reusing the full-size map
- * on a small logo is what turns an 18px indicator into grey fuzz; `bakeCached`
- * keys on source plus options, so previews at the same size share one bake.
+ * A map baked at a grid `size` can resolve — reusing the full-size one is what
+ * turns an 18px indicator to fuzz. Previews at one size share a bake.
  */
 function useSizedMap(
   src: string,
@@ -138,8 +137,7 @@ function LoadersPreview({
 }) {
   return (
     <div className="flex flex-col items-center gap-5 px-6 py-8">
-      {/* Two per row, and every cell the same width, so the buttons do not
-          jump around as their labels change length mid-run. */}
+      {/* Equal-width cells, so buttons hold still as their labels change. */}
       <div className="grid grid-cols-2 gap-3">
         {LOADERS.map((loader) => (
           <LoaderButton

@@ -3,11 +3,8 @@ import type React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * The single source of truth for page width. Header, page bodies and footer all
- * go through this so nothing drifts a few pixels out of alignment — and every
- * route shares one measure, so navigating never shifts the layout. The width is
- * set by the playground, which needs room for a canvas beside its controls;
- * prose elsewhere caps itself well inside it.
+ * The one source of page width, so nothing drifts and navigating never shifts
+ * the layout. Sized for the playground; prose caps itself well inside it.
  */
 export function Container({
   className,

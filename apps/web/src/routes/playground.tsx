@@ -65,10 +65,10 @@ export function Playground() {
 
       <PageHeader
         aside={
-          // The source artwork, as it went in. It sits beside the title rather
-          // than on the stage so the stage only ever shows dots.
+          // The source as it went in, beside the title so the stage stays all
+          // dots. Outlined, not filled — a plate reads as part of the logo.
           <figure className="flex flex-col items-center gap-2">
-            <div className="flex size-28 items-center justify-center bg-muted p-3">
+            <div className="flex size-28 items-center justify-center border border-border p-3">
               <img
                 alt={`${source.label} source artwork`}
                 className="max-h-full max-w-full object-contain dark:invert"
@@ -104,8 +104,7 @@ export function Playground() {
         />
       </PageHeader>
 
-      {/* Controls first in the DOM as well as on screen, so reading order
-          matches the order the settings are applied in. */}
+      {/* Controls first in the DOM too, so reading order matches apply order. */}
       <div className="grid grid-cols-1 gap-4 border-border border-t pt-8 lg:grid-cols-[300px_1fr]">
         <div className="flex min-w-0 flex-col gap-4">
           <BakePanel bake={bake} patch={patchBake} />

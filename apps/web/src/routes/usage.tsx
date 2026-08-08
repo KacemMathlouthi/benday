@@ -141,64 +141,48 @@ export function Usage() {
   return (
     <Container className="pb-20">
       <PageHeader
-        lead="benday is an open-code shadcn primitive. The CLI writes the component and its small canvas runtime into your project, where you can change every line."
+        lead="An open-code shadcn primitive. The CLI writes the component and its canvas runtime into your project; there is no package to depend on."
         title="Usage"
       />
 
       <Section
-        lead="benday renders to a canvas in the browser and brings no runtime package dependency."
-        title="Prerequisites"
-      >
-        <Bullets
-          items={[
-            "A React 18 or 19 app.",
-            "A shadcn components.json file so the CLI knows where your ui directory lives.",
-            "A logo as SVG, PNG, JPG or WebP. Transparency helps but is not required; opaque images fall back to a luminance mask.",
-          ]}
-        />
-      </Section>
-
-      <Section
-        lead="This copies the source into your configured ui directory. It does not add a benday package to package.json."
+        lead="Needs React 18 or 19, a shadcn components.json, and a logo as SVG, PNG, JPG or WebP."
         title="Install"
       >
         <RegistryInstall />
         <Note>
-          After installation, the code is yours at{" "}
-          <code>components/ui/benday.tsx</code> and{" "}
-          <code>components/ui/benday/*</code>.
+          The code lands at <code>components/ui/benday.tsx</code> and{" "}
+          <code>components/ui/benday/*</code>, and is yours to edit.
         </Note>
       </Section>
 
       <Section
-        lead="Point the component at an image. It bakes the logo into a dot map on mount and animates it."
+        lead="Point it at an image. It bakes the logo into a dot map on mount, then animates it."
         title="Quick start"
       >
         <CodeBlock code={QUICK_START} filename="benday-example.tsx" />
         <Note>
-          Colour is inherited: the default <code>currentColor</code> resolves
-          against the canvas and re-resolves when the theme flips, so the
-          indicator matches surrounding text without being told twice.
+          <code>currentColor</code> is the default and re-resolves when the
+          theme flips, so the mark tracks surrounding text on its own.
         </Note>
       </Section>
 
       <Section
-        lead="The browser bakes the source image into a small dot map once, then caches it by URL and options."
+        lead="The bake runs once per URL and options, then caches. Transparency is used when present; opaque images fall back to a luminance mask."
         title="Tune the bake"
       >
         <CodeBlock code={RUNTIME} filename="benday-example.tsx" />
         <Note>
-          Use the{" "}
+          The{" "}
           <Link className="underline hover:text-foreground" to="/playground">
             playground
           </Link>{" "}
-          to find settings that preserve your mark at its smallest rendered
-          size.
+          is the fast way to find settings that hold up at your smallest size.
         </Note>
       </Section>
 
       <Section
-        lead="Every preset animates the same dot map differently. Swap the name; nothing else changes."
+        lead="Same dot map, different motion. Swap the name; nothing else changes."
         title="Presets"
       >
         <div className="overflow-x-auto border border-border">
@@ -224,27 +208,26 @@ export function Usage() {
           </table>
         </div>
         <Note>
-          A preset is just a function of one dot and the clock, so you can pass
-          your own instead of a name.
+          A preset is a function of one dot and the clock, so you can pass your
+          own instead of a name.
         </Note>
       </Section>
 
       <Section
-        lead="idle and done both show the crisp mark; thinking runs the preset. Transitions run through a light spring, so done gives you the dots snapping back into the logo."
+        lead="thinking runs the preset; idle and done show the crisp mark. Switching springs the dots back into the logo."
         title="States"
       >
         <CodeBlock code={STATES} filename="states.tsx" />
       </Section>
 
       <Section
-        lead="Keep the indicator next to the thing that is pending, at the size that thing occupies."
+        lead="Put the indicator next to what is pending, at the size that thing occupies."
         title="Use in real UI"
       >
         <CodeBlock code={SAVE_BUTTON} filename="save-button.tsx" />
         <Note>
-          Note the <code>grid</code> override. At 18px a 24-dot grid produces
-          sub-pixel dots that read as grey fuzz, so small indicators want a
-          coarser bake of their own.
+          Note the <code>grid</code> override: at 18px a 24-dot grid gives
+          sub-pixel dots that read as grey fuzz.
         </Note>
       </Section>
 
@@ -298,11 +281,11 @@ export function Usage() {
       <Section title="Guidelines">
         <Bullets
           items={[
-            "Bake a coarser grid for small sizes. Below roughly 1.6px per dot the mark stops reading as a mark.",
-            "Thin strokes vanish. A dilate of 1 to 3px restores a hairline logo; lower threshold alongside it.",
-            'Wide wordmarks want fit="natural", or they get letterboxed into a square and lose half their size.',
-            "One indicator per pending region. Several animated marks in a viewport compete with each other.",
-            'Motion is decorative. The component ships role="img" with a per-state label, and renders a single static frame under prefers-reduced-motion.',
+            "Coarser grid for smaller sizes. Below roughly 1.6px per dot the mark stops reading.",
+            "Thin strokes vanish. A dilate of 1 to 3px rescues a hairline logo; drop threshold alongside it.",
+            'Wide wordmarks want fit="natural", or a square letterboxes away half their size.',
+            "One indicator per pending region. Several at once compete.",
+            'Motion is decorative: role="img" with a per-state label, and one static frame under prefers-reduced-motion.',
           ]}
         />
       </Section>

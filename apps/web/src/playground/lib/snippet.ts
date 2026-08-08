@@ -8,10 +8,7 @@ export function round(v: number): string {
   return String(Math.round(v * 100) / 100);
 }
 
-/**
- * Render the current settings as JSX, listing only what differs from the
- * defaults; a wall of props nobody needs to type is worse than no snippet.
- */
+/** The settings as JSX, listing only what differs from the defaults. */
 export function buildSnippet(bake: BakeState, render: RenderState): string {
   const bakeProps: string[] = [];
   const d = DEFAULT_BAKE_STATE;

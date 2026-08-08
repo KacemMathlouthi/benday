@@ -49,10 +49,8 @@ function chunkIntoTokens(text: string): string[] {
 const TOKENS = chunkIntoTokens(REASONING_TEXT);
 
 /**
- * Advance an index to `length`, hold at the end, then start over.
- *
- * Both mocks loop forever, so the preview is always mid-flight rather than
- * finished the moment you scroll to it.
+ * Advance to `length`, hold, then start over — both mocks loop, so the preview
+ * is always mid-flight rather than finished when you reach it.
  */
 function useLoop(length: number, tickMs: number, holdMs: number): number {
   const [index, setIndex] = useState(0);
@@ -82,11 +80,8 @@ function ReasoningMock({ mark }: { mark: React.ReactNode }) {
         </span>
       </ReasoningTrigger>
 
-      {/*
-        The stream would otherwise grow the page a line at a time. The box is
-        held at the finished text's height from the first token, so the words
-        fill an already-reserved space instead of pushing the page down.
-      */}
+      {/* Held at the finished text's height from the first token, so the
+          stream fills reserved space instead of growing the page. */}
       <div className="mt-2 h-32 overflow-hidden">
         <ReasoningContent className="w-full">
           {TOKENS.slice(0, index).join("")}
@@ -113,10 +108,8 @@ function TaskMock({ mark }: { mark: React.ReactNode }) {
         </div>
       </TaskTrigger>
 
-      {/*
-        Every step is always in the DOM so the box never resizes; the ones that
-        have not "arrived" yet are simply invisible.
-      */}
+      {/* Every step stays in the DOM so the box never resizes; the ones that
+          have not arrived yet are just invisible. */}
       <TaskContent className="mt-2 flex flex-col">
         {TASK_STEPS.map((step, i) => (
           <TaskItem
@@ -170,9 +163,8 @@ export function AgentPreview({
   );
 
   return (
-    // The rules span the whole box; the content inside each one is a centred
-    // column, so the block sits in the middle while every line inside it starts
-    // from the same left edge.
+    // Rules span the box, content is a centred column: the block sits in the
+    // middle while every line inside starts from the same left edge.
     <div className="flex flex-col divide-y divide-border">
       <Row>
         <ReasoningMock mark={mark} />
