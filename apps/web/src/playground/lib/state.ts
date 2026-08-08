@@ -1,4 +1,4 @@
-import type { DotShape, MaskMode, PresetName } from "benday";
+import type { DotShape, MaskMode, PresetName } from "@/components/ui/benday";
 
 /** Everything that feeds the bake step. */
 export interface BakeState {

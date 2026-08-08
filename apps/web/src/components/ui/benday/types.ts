@@ -115,7 +115,7 @@ export type PresetName =
   | "breathe"
   | "swirl";
 
-export type ThinkingState = "idle" | "thinking" | "done";
+export type BendayState = "idle" | "thinking" | "done";
 
 export type DotShape = "circle" | "square" | "diamond";
 
@@ -128,7 +128,7 @@ export interface RendererOptions {
   /** Preset name, or your own per-dot function. @default 'contour' */
   preset?: PresetName | Preset;
   /** @default 'thinking' */
-  state?: ThinkingState;
+  state?: BendayState;
   /** Rendered size in CSS pixels. @default 64 */
   size?: number;
   /**

@@ -7,13 +7,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MANAGERS = [
-  { command: "bun add", id: "bun" },
-  { command: "npm install", id: "npm" },
-  { command: "pnpm add", id: "pnpm" },
-  { command: "yarn add", id: "yarn" },
+  { command: "bunx shadcn@latest add", id: "bun" },
+  { command: "npx shadcn@latest add", id: "npm" },
+  { command: "pnpm dlx shadcn@latest add", id: "pnpm" },
+  { command: "yarn dlx shadcn@latest add", id: "yarn" },
 ];
 
-export function PackageInstall({ pkg }: { pkg: string }) {
+export function RegistryInstall({
+  item = "@benday/benday",
+}: {
+  item?: string;
+}) {
   return (
     <Tabs defaultValue="bun">
       <TabsList>
@@ -26,7 +30,7 @@ export function PackageInstall({ pkg }: { pkg: string }) {
 
       {MANAGERS.map((manager) => (
         <TabsContent className="mt-2" key={manager.id} value={manager.id}>
-          <Snippet code={`${manager.command} ${pkg}`}>
+          <Snippet code={`${manager.command} ${item}`}>
             <SnippetInput aria-label={`${manager.id} install command`} />
             <SnippetAddon align="inline-end">
               <SnippetCopyButton />

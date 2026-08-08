@@ -1,13 +1,13 @@
-import { ThinkingLogo } from "benday/react";
 import { Link } from "react-router";
 
 import { Container } from "@/components/container";
+import { Benday } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 
 export function NotFound() {
   return (
     <Container className="flex flex-col items-center py-24 text-center">
-      <ThinkingLogo
+      <Benday
         preset="scatter"
         size={120}
         src="/benday-mark.svg"

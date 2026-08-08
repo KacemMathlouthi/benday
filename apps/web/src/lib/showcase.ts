@@ -1,4 +1,4 @@
-import type { DotShape } from "benday";
+import type { DotShape } from "@/components/ui/benday";
 
 /** The settings the home page applies to every preview at once. */
 export interface ShowcaseSettings {

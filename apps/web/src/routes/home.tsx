@@ -1,5 +1,3 @@
-import { PRESET_NAMES } from "benday";
-import { ThinkingLogo } from "benday/react";
 import { useCallback, useState } from "react";
 import { Link } from "react-router";
 
@@ -7,6 +5,7 @@ import { Container } from "@/components/container";
 import { PresetCard } from "@/components/preset-card";
 import { Section } from "@/components/section";
 import { ShowcaseControls } from "@/components/showcase-controls";
+import { Benday, PRESET_NAMES } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 import type { ShowcaseSettings } from "@/lib/showcase";
 import { DEFAULT_SHOWCASE } from "@/lib/showcase";
@@ -26,7 +25,7 @@ export function Home() {
           100svh section would hang past the fold and centre everything low. */}
       <section className="flex min-h-[calc(100svh-3.5rem)] flex-col items-center justify-center py-12 text-center">
         <div className="flex items-center gap-4 sm:gap-5">
-          <ThinkingLogo
+          <Benday
             preset="contour"
             size={92}
             src={DEFAULT_SHOWCASE.logo}

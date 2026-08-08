@@ -1,157 +1,116 @@
 # benday
 
-Turn any logo into an animated dot-field thinking indicator.
+Turn any logo into an animated Ben-Day dot field for AI and agent interfaces.
 
-Shimmering text, then dot matrices, then dot orbs. Same UI slot, all generic. This one animates _your_ mark: drop in an SVG, PNG, JPG or WebP and it comes back as a grid of dots that breathes, ripples, scatters and settles.
+benday is distributed as open code through a shadcn registry. There is no benday npm package: the CLI copies the primitive into your project, and you own the result.
 
-> **Ben-Day dots** — the 1879 printing process that reproduced images as fields of small coloured dots, later lifted into fine art by Roy Lichtenstein. That is literally what the bake step does here.
+```bash
+bunx shadcn@latest add @benday/benday
+# or
+npx shadcn@latest add @benday/benday
+```
 
 ```tsx
-import { ThinkingLogo } from "benday/react";
+import { Benday } from "@/components/ui/benday";
 
-<ThinkingLogo src="/logo.svg" state="thinking" size={64} />;
+export function Example() {
+  return <Benday src="/logo.svg" />;
+}
 ```
 
-The package ships two entries. `benday` is the framework-agnostic core — the bake pipeline, the presets, and a canvas renderer you can drive yourself. `benday/react` is a thin component on top of it.
+The install adds:
 
-```ts
-import { bake, createRenderer } from "benday";
-
-const dotMap = await bake("/logo.svg", { grid: 24 });
-const renderer = createRenderer(canvas, { dotMap, preset: "contour" });
-
-renderer.update({ state: "done" });
-renderer.destroy();
+```text
+components/ui/benday.tsx
+components/ui/benday/bake.ts
+components/ui/benday/dom.ts
+components/ui/benday/presets.ts
+components/ui/benday/renderer.ts
+components/ui/benday/types.ts
+components/ui/benday/use-dot-map.ts
 ```
+
+Those files are ordinary application source. Edit the presets, change the canvas renderer, remove features, or fold the implementation into your own design system.
+
+## Registry setup
+
+The short `@benday/benday` address works automatically after the `@benday` namespace is accepted into shadcn's public registry directory. Until then, add the namespace once:
+
+```bash
+bunx shadcn@latest registry add '@benday=https://benday.kacemmathlouthi.dev/r/{name}.json'
+bunx shadcn@latest add @benday/benday
+```
+
+Or install the hosted item directly:
+
+```bash
+bunx shadcn@latest add https://benday.kacemmathlouthi.dev/r/benday.json
+```
+
+Once this repository is pushed publicly, shadcn also supports its GitHub address without namespace setup:
+
+```bash
+bunx shadcn@latest add KacemMathlouthi/benday/benday
+```
+
+The source registry catalog is [`registry.json`](./registry.json). `bun run registry:build` validates it and generates the installable payloads under `apps/web/public/r`.
 
 ## How it works
 
-The image is never drawn. It is **baked** once into a small dot map, and only that reaches the renderer:
+The source image is baked once into a compact dot map:
 
-1. **Rasterize** the source at a working resolution (SVGs rasterize cleanly at any scale, so there's no intermediate high-res pass).
-2. **Mask** ink from background. Alpha when the image has transparency, luminance-vs-sampled-background otherwise — which is why flattened PNGs and JPEGs work here rather than becoming a solid rectangle.
-3. **Dilate** (optional) to rescue hairline strokes.
-4. **Distance transform** — an exact Euclidean DT (Felzenszwalb & Huttenlocher, O(n)) giving every pixel its true distance to the outline. This is what lets an animation travel _along the shape's own thickness_ rather than just across its bounding box.
-5. **Grid sample** into cells, keeping coverage `v` and depth `d` per dot.
+1. Rasterize SVG, PNG, JPG or WebP in a browser canvas.
+2. Separate ink from the background using alpha or luminance.
+3. Optionally dilate the mask to rescue thin strokes.
+4. Run an exact Euclidean distance transform so every dot knows its depth inside the mark.
+5. Sample coverage and depth onto a grid.
+6. Animate only that dot map with the canvas renderer.
 
-The result is `{cols, rows, aspect, dots: [{x, y, v, d}]}` — a few KB of JSON, serializable, and cheap enough to ship at build time.
-
-## Two paths
-
-**Runtime** — drop-in-any-logo, client-side, cached per (url, options):
-
-```tsx
-<ThinkingLogo src="/logo.svg" bake={{ grid: 24, dilate: 1 }} />
-```
-
-**Build time** — bake once, ship the JSON, zero canvas work at mount:
-
-```tsx
-import dots from "./logo.dots.json";
-
-<ThinkingLogo dotMap={dots} />;
-```
-
-ESM only. Every consumer of a canvas component goes through a bundler, and a CJS build would duplicate the core's module state across the two entries.
-
-Use the playground's `dots.json` button to produce that file today. (A proper `npx benday logo.svg` CLI needs a headless rasterizer and is not built yet.)
+String sources are cached by URL and bake options. The renderer keeps its clock and settle spring across prop changes, stops when off-screen, follows reduced-motion preferences, and resolves `currentColor` against the canvas.
 
 ## Presets
 
-| Preset    | What it does                                                     |
-| --------- | ---------------------------------------------------------------- |
-| `shimmer` | A lit band sweeps the mark on the diagonal.                      |
-| `ripple`  | Concentric rings pulse outward from the center.                  |
-| `contour` | The wave follows the shape's own thickness — outline, then core. |
-| `scatter` | Dots drift off the lattice, then reconverge into the mark.       |
-| `flicker` | A random subset blinks at any moment.                            |
-| `breathe` | The whole mark swells and settles.                               |
-| `swirl`   | The mark twists around its center, outer dots lagging.           |
+- `shimmer`: a lit diagonal band
+- `ripple`: concentric rings
+- `contour`: a wave through the mark's own thickness
+- `scatter`: dots leave and return to the lattice
+- `flicker`: stable randomized blinking
+- `breathe`: coordinated scale and opacity
+- `swirl`: rotational displacement around the center
 
-A preset is just a function, so you can pass your own:
-
-```tsx
-<ThinkingLogo
-  src="/logo.svg"
-  preset={(dot, t, out) => {
-    out.a = 0.2 + 0.8 * ((Math.sin(t * 3 - dot.d * 6) + 1) / 2);
-    out.s = 1;
-  }}
-/>
-```
+Presets are plain functions and can be replaced or edited in the installed source.
 
 ## States
 
-`idle` → `thinking` → `done`. `thinking` runs the preset; the other two are the crisp mark. Transitions run through a light spring, so `done` gives you the dots snapping back into the logo.
-
-## Props
-
-| Prop | Default | Notes |
-| --- | --- | --- |
-| `src` | — | URL, data URI, `File`/`Blob`, or `HTMLImageElement` |
-| `dotMap` | — | Pre-baked map; takes precedence over `src` |
-| `bake` | — | `{grid, threshold, gamma, dilate, maskMode, invert, trim}` |
-| `size` | `64` | CSS pixels |
-| `fit` | `'square'` | `'natural'` sizes to the mark — wordmarks need it |
-| `state` | `'thinking'` | `idle` \| `thinking` \| `done` |
-| `preset` | `'contour'` | Name or your own function |
-| `speed` | `1` | Multiplier |
-| `color` | `'currentColor'` | Resolved off the canvas, re-resolved on theme flip |
-| `dotScale` | `0.62` | Dot diameter as a fraction of the cell |
-| `shape` | `'circle'` | `circle` \| `square` \| `diamond` |
-| `glow` | `0` | Halo radius |
-| `padding` | `0.06` | Inset as a fraction of the box |
-| `weight` | `0.5` | How much ink coverage drives dot size |
-| `paused` | `false` | Freeze on the current frame |
-
-## Runtime behavior
-
-- Canvas 2D, DPR capped at 2.
-- RAF gated by `IntersectionObserver` + `visibilitychange` — off-screen or backgrounded indicators cost nothing.
-- Settled non-`thinking` marks stop requesting frames entirely.
-- `prefers-reduced-motion` renders one static frame.
-- `role="img"` with a per-state label.
-
-## Tuning notes
-
-- **Thin strokes vanish.** That is what `dilate` is for; 1–3px usually restores a hairline mark. Lower `threshold` alongside it.
-- **Small sizes need their own bake.** At 20px a 24-dot grid produces sub-pixel dots. Bake a ~10-dot map for inline use — the playground shows the effective dot diameter and warns.
-- **Wide wordmarks** want `fit="natural"`, otherwise they get letterboxed into a square and lose half their size.
+`idle` and `done` render the crisp mark. `thinking` runs the selected preset. Transitions blend through a light spring, so changing to `done` pulls displaced dots back into the logo.
 
 ## Repository
 
-```
-apps/web            the site — home, usage, playground
-packages/benday     the published package (core + ./react)
+```text
+apps/web/src/components/ui/benday.tsx   canonical public primitive
+apps/web/src/components/ui/benday/      bake and renderer implementation
+apps/web/public/r/                       generated registry payloads
+apps/web/                                docs and playground
+registry.json                            shadcn registry source catalog
 ```
 
-Bun workspaces, Turborepo, Changesets, Ultracite (oxlint + oxfmt), Knip. The site is Vite + React Router + Tailwind v4 on shadcn's `base-lyra` style (Base UI, not Radix).
+The docs app consumes the same `@/components/ui/benday` source that the registry installs, so its examples exercise the consumer-owned version rather than a package build.
 
-## Playground
+## Development
 
 ```bash
 bun install
+bun run registry:build
 bun run dev
 ```
 
-Drop a logo anywhere on the page. Every bake and render option is a live control, and the sample set is deliberately nasty: a hairline burst, a wide wordmark, an opaque no-alpha tile, and a soft-gradient blob.
-
-## Links
-
-- Playground & docs — https://benday.kacemmathlouthi.dev
-- Repository — https://github.com/KacemMathlouthi/benday
-- Issues — https://github.com/KacemMathlouthi/benday/issues
-
-## Scripts
-
-| Script              | Does                                   |
-| ------------------- | -------------------------------------- |
-| `bun run dev`       | Playground on :5173                    |
-| `bun run build`     | Everything, through Turborepo          |
-| `bun run typecheck` | `tsc --noEmit` per workspace           |
-| `bun run check`     | Ultracite — format + lint              |
-| `bun run fix`       | Ultracite, writing fixes               |
-| `bun run knip`      | Unused files, exports and dependencies |
-| `bun run changeset` | Record a version bump                  |
+| Script                   | Purpose                                          |
+| ------------------------ | ------------------------------------------------ |
+| `bun run registry:build` | Validate the registry and generate `/r/*.json`   |
+| `bun run dev`            | Build the registry and start the Vite playground |
+| `bun run build`          | Build the registry and production site           |
+| `bun run typecheck`      | Type-check the web workspace                     |
+| `bun run check`          | Run formatting and lint checks                   |
+| `bun run knip`           | Find unused files, exports and dependencies      |
 
 MIT.

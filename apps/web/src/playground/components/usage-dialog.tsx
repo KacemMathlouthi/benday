@@ -1,5 +1,5 @@
 import { CodeBlock } from "@/components/code-block";
-import { PackageInstall } from "@/components/package-install";
+import { RegistryInstall } from "@/components/registry-install";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,19 +23,18 @@ export function UsageDialog({ snippet }: { snippet: string }) {
         <DialogHeader>
           <DialogTitle>Use these settings</DialogTitle>
           <DialogDescription>
-            Install the package, point <code>src</code> at your own logo and
-            drop the component in. Every prop below is one you changed here —
+            Add the source-owned primitive, point <code>src</code> at your own
+            logo and drop it in. Every prop below is one you changed here —
             anything left at its default is omitted.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
-          <PackageInstall pkg="benday" />
+          <RegistryInstall />
           <CodeBlock code={snippet} filename="usage.tsx" />
           <p className="text-muted-foreground text-xs leading-relaxed">
-            The bake runs in the browser on mount. To skip it at runtime, bake
-            once at build time with <code>bakeLogo()</code> and pass the
-            resulting map as <code>dotMap</code> instead of <code>src</code>.
+            The installed files live in your own <code>components/ui</code>
+            directory. Change the presets, renderer or bake pipeline directly.
           </p>
         </div>
       </DialogContent>

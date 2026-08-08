@@ -7,15 +7,14 @@ import { NAV_LINKS } from "@/components/nav-links";
 import { Button } from "@/components/ui/button";
 
 const REPO = "https://github.com/KacemMathlouthi/benday";
-const NPM = "https://www.npmjs.com/package/benday";
+const REGISTRY = "/r/registry.json";
 
 const externalLinks = [
   { href: REPO, label: "GitHub" },
-  { href: NPM, label: "npm" },
+  { href: REGISTRY, label: "Registry" },
 ];
 
 export function Footer() {
-
   return (
     <footer className="mt-auto border-border border-t">
       <Container>

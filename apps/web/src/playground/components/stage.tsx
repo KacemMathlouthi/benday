@@ -1,8 +1,13 @@
-import type { BakeOptions, DotMap } from "benday";
-import { ThinkingLogo, useDotMap } from "benday/react";
-import { RefreshCwIcon, RocketIcon, SparklesIcon, SearchIcon } from "lucide-react";
+import {
+  RefreshCwIcon,
+  RocketIcon,
+  SparklesIcon,
+  SearchIcon,
+} from "lucide-react";
 import { useMemo } from "react";
 
+import type { BakeOptions, DotMap } from "@/components/ui/benday";
+import { Benday, useDotMap } from "@/components/ui/benday";
 import { AgentPreview } from "@/playground/components/agent-preview";
 import { LoaderButton } from "@/playground/components/loader-button";
 import { gridForSize } from "@/playground/lib/grid";
@@ -38,7 +43,10 @@ function useSizedMap(
   size: number
 ): DotMap | null {
   const grid = gridForSize(size, render, bakeOptions.grid ?? 24);
-  const options = useMemo(() => ({ ...bakeOptions, grid }), [bakeOptions, grid]);
+  const options = useMemo(
+    () => ({ ...bakeOptions, grid }),
+    [bakeOptions, grid]
+  );
   return useDotMap(src, options).dotMap;
 }
 
@@ -60,7 +68,7 @@ function SizeSwatch({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <ThinkingLogo
+      <Benday
         {...logo}
         dotMap={dotMap ?? undefined}
         size={size}
@@ -98,7 +106,7 @@ function SimplePreview({
                 {error.message}
               </p>
             ) : (
-              <ThinkingLogo {...logo} size={size} state="thinking" />
+              <Benday {...logo} size={size} state="thinking" />
             )}
           </div>
           <Caption>{loading ? "Baking…" : "Dots"}</Caption>

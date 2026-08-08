@@ -1,7 +1,5 @@
-import type { DotMap, PresetName } from "benday";
-import { PRESET_NAMES, PRESETS } from "benday";
-import { ThinkingLogo } from "benday/react";
-
+import { Benday, PRESET_NAMES, PRESETS } from "@/components/ui/benday";
+import type { DotMap, PresetName } from "@/components/ui/benday/types";
 import {
   Select,
   SelectContent,
@@ -25,7 +23,7 @@ export function PresetPicker({
   patch: Patch<RenderState>;
 }) {
   const preview = (preset: PresetName, size: number) => (
-    <ThinkingLogo
+    <Benday
       dotMap={dotMap ?? undefined}
       dotScale={render.dotScale}
       preset={preset}
@@ -64,7 +62,11 @@ export function PresetPicker({
 
         <SelectContent>
           {PRESET_NAMES.map((preset) => (
-            <SelectItem className="gap-2.5 py-2.5 text-sm" key={preset} value={preset}>
+            <SelectItem
+              className="gap-2.5 py-2.5 text-sm"
+              key={preset}
+              value={preset}
+            >
               {preview(preset, 28)}
               {PRESETS[preset].label}
             </SelectItem>

@@ -1,8 +1,8 @@
-import type { DotMap } from "benday";
-import { ThinkingLogo } from "benday/react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import type { DotMap } from "@/components/ui/benday";
+import { Benday } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 import type { LogoProps } from "@/playground/lib/logo-props";
 
@@ -66,7 +66,7 @@ export function LoaderButton({
           <Icon style={{ height: ICON_PX, width: ICON_PX }} />
         </span>
         <span className="t-icon flex items-center justify-center" data-icon="b">
-          <ThinkingLogo
+          <Benday
             {...logo}
             dotMap={dotMap ?? undefined}
             size={ICON_PX}

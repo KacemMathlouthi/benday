@@ -1,9 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "workspaces": {
-    "packages/benday": {
-      "entry": ["src/index.ts", "src/react/index.ts"]
-    },
     "apps/web": {
       "ignore": ["src/components/ui/**", "src/components/ai-elements/**"]
     }

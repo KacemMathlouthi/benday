@@ -1,11 +1,11 @@
-import { PRESET_NAMES, PRESETS } from "benday";
 import type React from "react";
 import { Link } from "react-router";
 
 import { CodeBlock } from "@/components/code-block";
 import { Container } from "@/components/container";
-import { PackageInstall } from "@/components/package-install";
+import { RegistryInstall } from "@/components/registry-install";
 import { Note, PageHeader, Section } from "@/components/section";
+import { PRESET_NAMES, PRESETS } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 
 function Bullets({ items }: { items: React.ReactNode[] }) {
@@ -49,7 +49,7 @@ const PROPS: { name: string; type: string; def: string; note: string }[] = [
     def: "'thinking'",
     name: "state",
     note: "thinking runs the preset; the others settle to the crisp mark",
-    type: "ThinkingState",
+    type: "BendayState",
   },
   {
     def: "'contour'",
@@ -108,19 +108,15 @@ const PROPS: { name: string; type: string; def: string; note: string }[] = [
   },
 ];
 
-const QUICK_START = `import { ThinkingLogo } from "benday/react";
+const QUICK_START = `import { Benday } from "@/components/ui/benday";
 
-export function Thinking() {
-  return <ThinkingLogo src="/logo.svg" size={64} />;
+export function Example() {
+  return <Benday src="/logo.svg" size={64} />;
 }`;
 
-const RUNTIME = `<ThinkingLogo src="/logo.svg" bake={{ grid: 24, dilate: 1 }} />`;
+const RUNTIME = `<Benday src="/logo.svg" bake={{ grid: 24, dilate: 1 }} />`;
 
-const BUILD_TIME = `import dots from "./logo.dots.json";
-
-<ThinkingLogo dotMap={dots} />;`;
-
-const SAVE_BUTTON = `import { ThinkingLogo } from "benday/react";
+const SAVE_BUTTON = `import { Benday } from "@/components/ui/benday";
 
 export function SaveButton({ isSaving }: { isSaving: boolean }) {
   return (
@@ -130,7 +126,7 @@ export function SaveButton({ isSaving }: { isSaving: boolean }) {
       type="button"
     >
       {isSaving ? (
-        <ThinkingLogo src="/logo.svg" size={18} bake={{ grid: 10 }} />
+        <Benday src="/logo.svg" size={18} bake={{ grid: 10 }} />
       ) : null}
       <span>{isSaving ? "Saving…" : "Save changes"}</span>
     </button>
@@ -139,49 +135,46 @@ export function SaveButton({ isSaving }: { isSaving: boolean }) {
 
 const STATES = `const state = isStreaming ? "thinking" : "done";
 
-<ThinkingLogo src="/logo.svg" state={state} />;`;
-
-const VANILLA = `import { bake, createRenderer } from "benday";
-
-const dotMap = await bake("/logo.svg", { grid: 24 });
-const renderer = createRenderer(canvas, { dotMap, preset: "contour" });
-
-renderer.update({ state: "done" });
-renderer.destroy();`;
+<Benday src="/logo.svg" state={state} />;`;
 
 export function Usage() {
   return (
     <Container className="pb-20">
       <PageHeader
-        lead="benday ships as a single npm package with two entries: a framework-agnostic core, and a React component on top of it. Install once, point it at a logo, and pick how the dots move."
+        lead="benday is an open-code shadcn primitive. The CLI writes the component and its small canvas runtime into your project, where you can change every line."
         title="Usage"
       />
 
       <Section
-        lead="benday renders to a canvas in the browser, so it needs very little around it."
+        lead="benday renders to a canvas in the browser and brings no runtime package dependency."
         title="Prerequisites"
       >
         <Bullets
           items={[
-            "A React 18 or 19 app, if you want the component. The core has no React dependency at all.",
-            "A bundler. The package is ESM only.",
+            "A React 18 or 19 app.",
+            "A shadcn components.json file so the CLI knows where your ui directory lives.",
             "A logo as SVG, PNG, JPG or WebP. Transparency helps but is not required; opaque images fall back to a luminance mask.",
           ]}
         />
       </Section>
 
       <Section
-        lead="React is an optional peer dependency, so the core installs and runs without it."
+        lead="This copies the source into your configured ui directory. It does not add a benday package to package.json."
         title="Install"
       >
-        <PackageInstall pkg="benday" />
+        <RegistryInstall />
+        <Note>
+          After installation, the code is yours at{" "}
+          <code>components/ui/benday.tsx</code> and{" "}
+          <code>components/ui/benday/*</code>.
+        </Note>
       </Section>
 
       <Section
         lead="Point the component at an image. It bakes the logo into a dot map on mount and animates it."
         title="Quick start"
       >
-        <CodeBlock code={QUICK_START} filename="thinking.tsx" />
+        <CodeBlock code={QUICK_START} filename="benday-example.tsx" />
         <Note>
           Colour is inherited: the default <code>currentColor</code> resolves
           against the canvas and re-resolves when the theme flips, so the
@@ -190,29 +183,18 @@ export function Usage() {
       </Section>
 
       <Section
-        lead="Baking turns an image into a small JSON dot map. You can do it in the browser or ahead of time."
-        title="Two ways to bake"
+        lead="The browser bakes the source image into a small dot map once, then caches it by URL and options."
+        title="Tune the bake"
       >
-        <div className="flex flex-col gap-2">
-          <h3 className="font-medium text-sm">Runtime: drop in any logo</h3>
-          <CodeBlock code={RUNTIME} filename="runtime.tsx" />
-          <Note>
-            Cached per URL and options, so repeated mounts cost nothing.
-          </Note>
-        </div>
-        <div className="mt-4 flex flex-col gap-2">
-          <h3 className="font-medium text-sm">
-            Build time: bake once, ship the JSON
-          </h3>
-          <CodeBlock code={BUILD_TIME} filename="build-time.tsx" />
-          <Note>
-            A few KB of numbers and no canvas work at mount. Use the{" "}
-            <Link className="underline hover:text-foreground" to="/playground">
-              playground
-            </Link>{" "}
-            to tune the bake and download the map.
-          </Note>
-        </div>
+        <CodeBlock code={RUNTIME} filename="benday-example.tsx" />
+        <Note>
+          Use the{" "}
+          <Link className="underline hover:text-foreground" to="/playground">
+            playground
+          </Link>{" "}
+          to find settings that preserve your mark at its smallest rendered
+          size.
+        </Note>
       </Section>
 
       <Section
@@ -266,22 +248,11 @@ export function Usage() {
         </Note>
       </Section>
 
-      <Section
-        lead="The core exposes the same renderer the component uses, with no React involved."
-        title="Without React"
-      >
-        <CodeBlock code={VANILLA} filename="vanilla.ts" language="ts" />
-        <Note>
-          The renderer owns the animation clock and the settle spring, so{" "}
-          <code>update()</code> changes settings without restarting the motion.
-        </Note>
-      </Section>
-
       <Section title="Props">
         <div className="overflow-x-auto border border-border">
           <table className="w-full text-left text-sm">
             <caption className="sr-only">
-              Every prop the ThinkingLogo component accepts
+              Every prop the Benday component accepts
             </caption>
             <thead>
               <tr className="border-border border-b bg-muted text-muted-foreground text-xs">

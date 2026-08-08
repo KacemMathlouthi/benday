@@ -1,5 +1,3 @@
-import type { DotMap } from "benday";
-import { ThinkingLogo } from "benday/react";
 import { useEffect, useState } from "react";
 
 import {
@@ -14,6 +12,8 @@ import {
   TaskItemFile,
   TaskTrigger,
 } from "@/components/ai-elements/task";
+import type { DotMap } from "@/components/ui/benday";
+import { Benday } from "@/components/ui/benday";
 import { cn } from "@/lib/utils";
 import type { LogoProps } from "@/playground/lib/logo-props";
 
@@ -161,7 +161,7 @@ export function AgentPreview({
   inlineMap: DotMap | null;
 }) {
   const mark = (
-    <ThinkingLogo
+    <Benday
       {...logo}
       dotMap={inlineMap ?? undefined}
       size={MARK_SIZE}

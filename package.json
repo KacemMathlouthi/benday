@@ -1,5 +1,5 @@
 {
-  "name": "benday-monorepo",
+  "name": "benday",
   "private": true,
   "homepage": "https://benday.kacemmathlouthi.dev",
   "bugs": {
@@ -12,28 +12,25 @@
     "url": "git+https://github.com/KacemMathlouthi/benday.git"
   },
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "type": "module",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
+    "build": "bun run registry:build && turbo run build",
+    "dev": "bun run registry:build && turbo run dev",
     "typecheck": "turbo run typecheck",
+    "registry:build": "shadcn build --output apps/web/public/r",
     "check": "ultracite check",
     "fix": "ultracite fix",
     "knip": "knip",
-    "clean": "turbo run clean && rm -rf node_modules",
-    "changeset": "changeset",
-    "version-packages": "changeset version && bun install --lockfile-only",
-    "release": "turbo run build --filter=benday && changeset publish"
+    "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.8",
     "@types/bun": "^1.3.9",
     "knip": "^5.66.1",
     "oxfmt": "^0.62.0",
     "oxlint": "^1.77.0",
+    "shadcn": "^4.16.2",
     "turbo": "^2.8.14",
     "typescript": "^5.9.3",
     "ultracite": "^7.1.4"

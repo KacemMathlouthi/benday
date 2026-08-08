@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-import type { BakeSource } from "../bake";
-import { bake, bakeCached } from "../bake";
-import type { BakeOptions, DotMap } from "../types";
+import type { BakeSource } from "./bake";
+import { bake, bakeCached } from "./bake";
+import type { BakeOptions, DotMap } from "./types";
 
 export interface UseDotMapResult {
   dotMap: DotMap | null;

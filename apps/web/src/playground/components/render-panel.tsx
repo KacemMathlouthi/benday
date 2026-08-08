@@ -1,5 +1,4 @@
-import type { DotMap, DotShape } from "benday";
-
+import type { DotMap, DotShape } from "@/components/ui/benday";
 import { cn } from "@/lib/utils";
 import {
   Panel,

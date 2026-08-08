@@ -7,6 +7,7 @@ export default defineConfig({
   ignorePatterns: [
     ...core.ignorePatterns,
     "**/dist",
+    "apps/web/public/r",
     ".turbo",
     // Vendored verbatim from shadcn registries — regenerated, not authored.
     "apps/web/src/components/ui",

@@ -1,5 +1,4 @@
-import type { DotShape } from "benday";
-
+import type { DotShape } from "@/components/ui/benday";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { ShowcaseSettings } from "@/lib/showcase";

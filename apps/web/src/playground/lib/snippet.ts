@@ -72,5 +72,5 @@ export function buildSnippet(bake: BakeState, render: RenderState): string {
     props.push(`color="${render.color}"`);
   }
 
-  return `<ThinkingLogo\n  ${props.join("\n  ")}\n/>`;
+  return `import { Benday } from "@/components/ui/benday";\n\n<Benday\n  ${props.join("\n  ")}\n/>`;
 }

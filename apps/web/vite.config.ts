@@ -13,18 +13,6 @@ export default defineConfig({
   },
   plugins: [react(), tailwindcss()],
   resolve: {
-    // Anchored regexes, not the object form: object keys prefix-match, so a
-    // bare "benday" entry would swallow "benday/react".
-    alias: [
-      { find: /^@\//u, replacement: `${here("./src")}/` },
-      {
-        find: /^benday$/u,
-        replacement: here("../../packages/benday/src/index.ts"),
-      },
-      {
-        find: /^benday\/react$/u,
-        replacement: here("../../packages/benday/src/react/index.ts"),
-      },
-    ],
+    alias: [{ find: /^@\//u, replacement: `${here("./src")}/` }],
   },
 });

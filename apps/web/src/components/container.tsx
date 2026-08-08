@@ -9,7 +9,10 @@ import { cn } from "@/lib/utils";
  * set by the playground, which needs room for a canvas beside its controls;
  * prose elsewhere caps itself well inside it.
  */
-export function Container({ className, ...props }: React.ComponentProps<"div">) {
+export function Container({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       className={cn("mx-auto w-full max-w-5xl px-4 sm:px-6", className)}

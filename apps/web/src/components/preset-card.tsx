@@ -1,7 +1,5 @@
-import type { PresetName } from "benday";
-import { PRESETS } from "benday";
-import { ThinkingLogo } from "benday/react";
-
+import { Benday, PRESETS } from "@/components/ui/benday";
+import type { PresetName } from "@/components/ui/benday/types";
 import type { ShowcaseSettings } from "@/lib/showcase";
 
 /**
@@ -21,7 +19,7 @@ export function PresetCard({
   return (
     <div className="flex flex-col border border-border p-4">
       <div className="flex flex-1 items-center justify-center py-6">
-        <ThinkingLogo
+        <Benday
           color={settings.color}
           dotScale={settings.dotScale}
           preset={preset}

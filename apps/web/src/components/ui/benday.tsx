@@ -1,18 +1,18 @@
 import type { CSSProperties, CanvasHTMLAttributes } from "react";
 import { useEffect, useRef } from "react";
 
-import type { BakeSource } from "../bake";
-import { createRenderer } from "../renderer";
+import type { BakeSource } from "./benday/bake";
+import { createRenderer } from "./benday/renderer";
 import type {
   BakeOptions,
+  BendayState,
   DotMap,
   Renderer,
   RendererOptions,
-  ThinkingState,
-} from "../types";
-import { useDotMap } from "./use-dot-map";
+} from "./benday/types";
+import { useDotMap } from "./benday/use-dot-map";
 
-export interface ThinkingLogoProps
+export interface BendayProps
   extends
     Omit<
       CanvasHTMLAttributes<HTMLCanvasElement>,
@@ -28,7 +28,7 @@ export interface ThinkingLogoProps
   style?: CSSProperties;
 }
 
-const STATE_LABEL: Record<ThinkingState, string> = {
+const STATE_LABEL: Record<BendayState, string> = {
   done: "Done",
   idle: "Idle",
   thinking: "Thinking…",
@@ -42,7 +42,7 @@ const STATE_LABEL: Record<ThinkingState, string> = {
  * through `renderer.update()` rather than by recreating anything, so the
  * animation never restarts mid-flight.
  */
-export function ThinkingLogo({
+export function Benday({
   src,
   dotMap: dotMapProp,
   bake: bakeOptions,
@@ -62,7 +62,7 @@ export function ThinkingLogo({
   style,
   "aria-label": ariaLabel,
   ...rest
-}: ThinkingLogoProps) {
+}: BendayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<Renderer | null>(null);
 
@@ -157,3 +157,36 @@ export function ThinkingLogo({
     />
   );
 }
+
+export {
+  DEFAULT_BAKE,
+  bake,
+  bakeCached,
+  bakeKey,
+  clearBakeCache,
+  resolveBakeOptions,
+} from "./benday/bake";
+export type { BakeSource } from "./benday/bake";
+export { prefersReducedMotion } from "./benday/dom";
+export { PRESET_NAMES, PRESETS, dotRandom, makeFrame } from "./benday/presets";
+export type { PresetDefinition } from "./benday/presets";
+export { DEFAULT_RENDERER_OPTIONS, createRenderer } from "./benday/renderer";
+export type {
+  BakeOptions,
+  BendayState,
+  Dot,
+  DotContext,
+  DotFrame,
+  DotMap,
+  DotShape,
+  Fit,
+  MaskMode,
+  Preset,
+  PresetName,
+  Renderer,
+  RendererOptions,
+  ResolvedBakeOptions,
+  ResolvedRendererOptions,
+} from "./benday/types";
+export { useDotMap } from "./benday/use-dot-map";
+export type { UseDotMapResult } from "./benday/use-dot-map";
