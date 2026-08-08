@@ -49,7 +49,7 @@ export function Home() {
         <img
           alt="A stippled figure standing on a field of dots, trailing the grid behind it"
           className="mt-8 w-full max-w-xl invert dark:invert-0"
-          src="/hero-field.png"
+          src="/hero-field.webp"
         />
 
         <p className="mt-8 w-full max-w-2xl text-balance text-muted-foreground leading-relaxed">

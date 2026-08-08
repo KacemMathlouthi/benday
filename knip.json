@@ -6,7 +6,8 @@
       "project": ["registry/**/*.{ts,tsx}"]
     },
     "apps/web": {
-      "ignore": ["src/components/ui/**", "src/components/ai-elements/**"]
+      "ignore": ["src/components/ui/**", "src/components/ai-elements/**"],
+      "ignoreDependencies": ["ai"]
     }
   }
 }
