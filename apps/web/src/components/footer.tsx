@@ -1,17 +1,24 @@
+import { Globe } from "lucide-react";
 import { Link } from "react-router";
 
 import { Container } from "@/components/container";
 import { GithubIcon } from "@/components/icons/github-icon";
+import { XIcon } from "@/components/icons/x-icon";
 import { Logo } from "@/components/logo";
 import { NAV_LINKS } from "@/components/nav-links";
 import { Button } from "@/components/ui/button";
 
 const REPO = "https://github.com/KacemMathlouthi/benday";
-const REGISTRY = "/r/registry.json";
 
-const externalLinks = [
-  { href: REPO, label: "GitHub" },
-  { href: REGISTRY, label: "Registry" },
+/** The icon rail: the project first, then the person who maintains it. */
+const socialLinks = [
+  { Icon: GithubIcon, href: REPO, label: "benday on GitHub" },
+  { Icon: XIcon, href: "https://x.com/KacemMathl44045", label: "Kacem on X" },
+  {
+    Icon: Globe,
+    href: "https://kacemmathlouthi.dev",
+    label: "Kacem's portfolio",
+  },
 ];
 
 export function Footer() {
@@ -21,23 +28,26 @@ export function Footer() {
         <div className="flex flex-col gap-6 py-6">
           <div className="flex items-center justify-between">
             <Logo />
-            {/* Matches the header: pull the icon out to the container edge. */}
+            {/* Matches the header: pull the icons out to the container edge. */}
             <div className="-mr-2 flex items-center">
-              <Button
-                nativeButton={false}
-                render={
-                  <a
-                    aria-label="benday on GitHub"
-                    href={REPO}
-                    rel="noreferrer"
-                    target="_blank"
-                  />
-                }
-                size="icon"
-                variant="ghost"
-              >
-                <GithubIcon />
-              </Button>
+              {socialLinks.map(({ href, label, Icon }) => (
+                <Button
+                  key={href}
+                  nativeButton={false}
+                  render={
+                    <a
+                      aria-label={label}
+                      href={href}
+                      rel="noreferrer"
+                      target="_blank"
+                    />
+                  }
+                  size="icon"
+                  variant="ghost"
+                >
+                  <Icon />
+                </Button>
+              ))}
             </div>
           </div>
 
@@ -48,18 +58,6 @@ export function Footer() {
                   <Link className="hover:text-foreground" to={link.to}>
                     {link.label}
                   </Link>
-                </li>
-              ))}
-              {externalLinks.map((link) => (
-                <li key={link.label}>
-                  <a
-                    className="hover:text-foreground"
-                    href={link.href}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {link.label}
-                  </a>
                 </li>
               ))}
             </ul>

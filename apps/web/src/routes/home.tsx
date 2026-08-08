@@ -24,14 +24,18 @@ export function Home() {
       {/* The header is sticky but still occupies its 3.5rem of flow, so a plain
           100svh section would hang past the fold and centre everything low. */}
       <section className="flex min-h-[calc(100svh-3.5rem)] flex-col items-center justify-center py-12 text-center">
-        <div className="flex items-center gap-4 sm:gap-5">
+        <div className="flex items-center gap-5 sm:gap-6">
           <Benday
-            preset="contour"
-            size={92}
+            preset="shimmer"
+            size={128}
             src={DEFAULT_SHOWCASE.logo}
             state="thinking"
           />
-          <h1 className="font-medium text-5xl tracking-tight sm:text-6xl">
+          {/* Geist Pixel has one weight, so no `font-medium`: asking for a
+              heavier cut here only gets a synthesised bold that smears the
+              pixel grid. Its letterforms are already on a grid too, which is
+              why the sans's `tracking-tight` comes off as well. */}
+          <h1 className="font-pixel-circle text-6xl leading-none sm:text-7xl">
             benday
           </h1>
         </div>
@@ -72,7 +76,7 @@ export function Home() {
       >
         <ShowcaseControls onChange={patch} settings={settings} />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PRESET_NAMES.map((preset) => (
             <PresetCard key={preset} preset={preset} settings={settings} />
           ))}
