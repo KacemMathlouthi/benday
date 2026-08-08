@@ -9,41 +9,43 @@
       "title": "Benday",
       "description": "Turn any logo into a customizable animated Ben-Day dot field.",
       "author": "Kacem Mathlouthi",
+      "categories": ["ai", "loader", "animation"],
+      "docs": "Point Benday at your logo with src, or ship a pre-baked dotMap for zero work on the client. Full API and recipes: https://benday.kacemmathlouthi.dev/usage",
       "dependencies": [],
       "registryDependencies": [],
       "files": [
         {
-          "path": "apps/web/src/components/ui/benday.tsx",
+          "path": "registry/ui/benday.tsx",
           "type": "registry:ui",
           "target": "@ui/benday.tsx"
         },
         {
-          "path": "apps/web/src/components/ui/benday/bake.ts",
+          "path": "registry/ui/benday/bake.ts",
           "type": "registry:ui",
           "target": "@ui/benday/bake.ts"
         },
         {
-          "path": "apps/web/src/components/ui/benday/dom.ts",
+          "path": "registry/ui/benday/dom.ts",
           "type": "registry:ui",
           "target": "@ui/benday/dom.ts"
         },
         {
-          "path": "apps/web/src/components/ui/benday/presets.ts",
+          "path": "registry/ui/benday/presets.ts",
           "type": "registry:ui",
           "target": "@ui/benday/presets.ts"
         },
         {
-          "path": "apps/web/src/components/ui/benday/renderer.ts",
+          "path": "registry/ui/benday/renderer.ts",
           "type": "registry:ui",
           "target": "@ui/benday/renderer.ts"
         },
         {
-          "path": "apps/web/src/components/ui/benday/types.ts",
+          "path": "registry/ui/benday/types.ts",
           "type": "registry:ui",
           "target": "@ui/benday/types.ts"
         },
         {
-          "path": "apps/web/src/components/ui/benday/use-dot-map.ts",
+          "path": "registry/ui/benday/use-dot-map.ts",
           "type": "registry:ui",
           "target": "@ui/benday/use-dot-map.ts"
         }

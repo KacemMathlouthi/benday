@@ -1,3 +1,4 @@
+import { PRESET_NAMES, PRESETS } from "@registry/ui/benday";
 import type React from "react";
 import { Link } from "react-router";
 
@@ -5,7 +6,6 @@ import { CodeBlock } from "@/components/code-block";
 import { Container } from "@/components/container";
 import { RegistryInstall } from "@/components/registry-install";
 import { Note, PageHeader, Section } from "@/components/section";
-import { PRESET_NAMES, PRESETS } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 
 function Bullets({ items }: { items: React.ReactNode[] }) {
@@ -137,6 +137,27 @@ const STATES = `const state = isStreaming ? "thinking" : "done";
 
 <Benday src="/logo.svg" state={state} />;`;
 
+const PREBAKE = `// scripts/bake-logo.ts — run once, commit the JSON.
+import { writeFile } from "node:fs/promises";
+import { bake } from "@/components/ui/benday";
+
+const dotMap = await bake("./public/logo.svg", { grid: 24 });
+await writeFile("./src/logo-dots.json", JSON.stringify(dotMap));`;
+
+const PREBAKE_USE = `import dotMap from "@/logo-dots.json";
+
+<Benday dotMap={dotMap} size={64} />;`;
+
+const MANUAL = `components/ui/
+├── benday.tsx          the component and the public exports
+└── benday/
+    ├── bake.ts         image → dot map
+    ├── dom.ts          colour, theme, visibility, DPR
+    ├── presets.ts      the seven animations
+    ├── renderer.ts     the canvas painter
+    ├── types.ts        every exported type
+    └── use-dot-map.ts  the React binding`;
+
 export function Usage() {
   return (
     <Container className="pb-20">
@@ -153,6 +174,25 @@ export function Usage() {
         <Note>
           The code lands at <code>components/ui/benday.tsx</code> and{" "}
           <code>components/ui/benday/*</code>, and is yours to edit.
+        </Note>
+      </Section>
+
+      <Section
+        lead="No CLI? Copy the seven files out of the registry payload by hand. Nothing generates them, and the imports between them are relative, so the tree is all that matters."
+        title="Manual install"
+      >
+        <CodeBlock code={MANUAL} filename="where the files go" />
+        <Note>
+          Every file&rsquo;s source is the <code>content</code> field of{" "}
+          <a
+            className="underline hover:text-foreground"
+            href="/r/benday.json"
+            rel="noreferrer"
+            target="_blank"
+          >
+            /r/benday.json
+          </a>
+          . Only React is required — there is nothing else to install.
         </Note>
       </Section>
 
@@ -218,6 +258,25 @@ export function Usage() {
         title="States"
       >
         <CodeBlock code={STATES} filename="states.tsx" />
+      </Section>
+
+      <Section
+        lead="The bake is the only expensive step, and it does not need to happen in the browser. Run it once at build time, commit the dot map, and the client just paints."
+        title="Bake ahead of time"
+      >
+        <CodeBlock code={PREBAKE} filename="bake-logo.ts" />
+        <CodeBlock code={PREBAKE_USE} filename="app.tsx" />
+        <Note>
+          <code>dotMap</code> wins over <code>src</code>, so nothing rasterizes
+          on mount and the mark is there on the first frame. A 24-dot map is a
+          few KB of JSON. <code>bake</code> draws through a canvas, so the
+          script needs a DOM — run it under Playwright, jsdom with node-canvas,
+          or any browser context. Settle the bake options in the{" "}
+          <Link className="underline hover:text-foreground" to="/playground">
+            playground
+          </Link>{" "}
+          first, then pass the same ones here.
+        </Note>
       </Section>
 
       <Section

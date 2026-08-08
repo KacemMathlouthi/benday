@@ -1,5 +1,6 @@
-import { Benday, PRESETS } from "@/components/ui/benday";
-import type { PresetName } from "@/components/ui/benday/types";
+import { Benday, PRESETS } from "@registry/ui/benday";
+import type { PresetName } from "@registry/ui/benday/types";
+
 import type { ShowcaseSettings } from "@/lib/showcase";
 
 /**

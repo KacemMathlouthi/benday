@@ -1,4 +1,5 @@
-import type { MaskMode } from "@/components/ui/benday";
+import type { MaskMode } from "@registry/ui/benday";
+
 import {
   Panel,
   Segmented,

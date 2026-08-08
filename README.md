@@ -5,9 +5,9 @@ Turn any logo into an animated Ben-Day dot field for AI and agent interfaces.
 benday is distributed as open code through a shadcn registry. There is no benday npm package: the CLI copies the primitive into your project, and you own the result.
 
 ```bash
-bunx shadcn@latest add @benday/benday
+bunx shadcn@latest add https://benday.kacemmathlouthi.dev/r/benday.json
 # or
-npx shadcn@latest add @benday/benday
+npx shadcn@latest add https://benday.kacemmathlouthi.dev/r/benday.json
 ```
 
 ```tsx
@@ -34,26 +34,32 @@ Those files are ordinary application source. Edit the presets, change the canvas
 
 ## Registry setup
 
-The short `@benday/benday` address works automatically after the `@benday` namespace is accepted into shadcn's public registry directory. Until then, add the namespace once:
+The URL above needs no setup. Namespaces in shadcn are decentralized — nobody has to approve one — so registering `@benday` in your own project is a one-time command and the short address works immediately:
 
 ```bash
 bunx shadcn@latest registry add '@benday=https://benday.kacemmathlouthi.dev/r/{name}.json'
 bunx shadcn@latest add @benday/benday
 ```
 
-Or install the hosted item directly:
+That writes a `registries` entry into your `components.json`; you can also add it by hand:
 
-```bash
-bunx shadcn@latest add https://benday.kacemmathlouthi.dev/r/benday.json
+```json
+{
+  "registries": {
+    "@benday": "https://benday.kacemmathlouthi.dev/r/{name}.json"
+  }
+}
 ```
 
-Once this repository is pushed publicly, shadcn also supports its GitHub address without namespace setup:
+shadcn also resolves the GitHub address without any namespace setup:
 
 ```bash
 bunx shadcn@latest add KacemMathlouthi/benday/benday
 ```
 
-The source registry catalog is [`registry.json`](./registry.json). `bun run registry:build` validates it and generates the installable payloads under `apps/web/public/r`.
+Listing `@benday` in [shadcn's public registry directory](https://ui.shadcn.com/r/registries.json) is a separate, optional step. It only affects discovery through `shadcn search` — installing never depends on it.
+
+The source catalog is [`registry.json`](./registry.json). `bun run registry:build` validates it and writes the installable payloads to `apps/web/public/r`.
 
 ## How it works
 
@@ -87,14 +93,14 @@ Presets are plain functions and can be replaced or edited in the installed sourc
 ## Repository
 
 ```text
-apps/web/src/components/ui/benday.tsx   canonical public primitive
-apps/web/src/components/ui/benday/      bake and renderer implementation
-apps/web/public/r/                       generated registry payloads
-apps/web/                                docs and playground
-registry.json                            shadcn registry source catalog
+registry/ui/benday.tsx    the primitive, and the public exports
+registry/ui/benday/       bake, renderer, presets, React binding
+registry.json             shadcn registry source catalog
+apps/web/                 docs site and playground
+apps/web/public/r/        generated registry payloads
 ```
 
-The docs app consumes the same `@/components/ui/benday` source that the registry installs, so its examples exercise the consumer-owned version rather than a package build.
+`registry/` mirrors the tree the CLI installs, so the relative imports between those files are the same ones a consumer ends up with. The docs app imports them through the `@registry/*` alias rather than keeping a copy, so every example on the site exercises exactly what ships.
 
 ## Development
 

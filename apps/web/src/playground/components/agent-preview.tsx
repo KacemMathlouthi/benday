@@ -1,3 +1,5 @@
+import type { DotMap } from "@registry/ui/benday";
+import { Benday } from "@registry/ui/benday";
 import { useEffect, useState } from "react";
 
 import {
@@ -12,8 +14,6 @@ import {
   TaskItemFile,
   TaskTrigger,
 } from "@/components/ai-elements/task";
-import type { DotMap } from "@/components/ui/benday";
-import { Benday } from "@/components/ui/benday";
 import { cn } from "@/lib/utils";
 import type { LogoProps } from "@/playground/lib/logo-props";
 

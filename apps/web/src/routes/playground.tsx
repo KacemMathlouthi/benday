@@ -1,9 +1,9 @@
+import type { BakeOptions } from "@registry/ui/benday";
+import { useDotMap } from "@registry/ui/benday";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { Container } from "@/components/container";
 import { PageHeader } from "@/components/section";
-import type { BakeOptions } from "@/components/ui/benday";
-import { useDotMap } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 import { BakePanel } from "@/playground/components/bake-panel";
 import { RenderPanel } from "@/playground/components/render-panel";

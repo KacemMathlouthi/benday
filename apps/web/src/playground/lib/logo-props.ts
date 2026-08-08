@@ -1,4 +1,5 @@
-import type { DotMap } from "@/components/ui/benday";
+import type { DotMap } from "@registry/ui/benday";
+
 import type { RenderState } from "@/playground/lib/state";
 
 /**

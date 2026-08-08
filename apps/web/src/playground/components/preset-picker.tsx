@@ -1,5 +1,6 @@
-import { Benday, PRESET_NAMES, PRESETS } from "@/components/ui/benday";
-import type { DotMap, PresetName } from "@/components/ui/benday/types";
+import { Benday, PRESET_NAMES, PRESETS } from "@registry/ui/benday";
+import type { DotMap, PresetName } from "@registry/ui/benday/types";
+
 import {
   Select,
   SelectContent,

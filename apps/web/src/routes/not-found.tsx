@@ -1,7 +1,7 @@
+import { Benday } from "@registry/ui/benday";
 import { Link } from "react-router";
 
 import { Container } from "@/components/container";
-import { Benday } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 
 export function NotFound() {

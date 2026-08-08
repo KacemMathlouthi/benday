@@ -1,8 +1,8 @@
+import type { DotMap } from "@registry/ui/benday";
+import { Benday } from "@registry/ui/benday";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import type { DotMap } from "@/components/ui/benday";
-import { Benday } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 import type { LogoProps } from "@/playground/lib/logo-props";
 

@@ -13,6 +13,9 @@ export default defineConfig({
   },
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: [{ find: /^@\//u, replacement: `${here("./src")}/` }],
+    alias: [
+      { find: /^@registry\//u, replacement: `${here("../../registry")}/` },
+      { find: /^@\//u, replacement: `${here("./src")}/` },
+    ],
   },
 });

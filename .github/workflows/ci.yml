@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint and format
+        run: bun run check
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Unused code
+        run: bun run knip
+
+      - name: Build registry
+        run: bun run registry:build
+
+      # The payloads under apps/web/public/r are committed, so a component
+      # edited without rebuilding would ship a stale install.
+      - name: Registry is up to date
+        run: git diff --exit-code -- apps/web/public/r
+
+      - name: Build
+        run: bun run build

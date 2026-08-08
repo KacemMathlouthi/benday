@@ -1,3 +1,5 @@
+"use client";
+
 import type { CSSProperties, CanvasHTMLAttributes } from "react";
 import { useEffect, useRef } from "react";
 

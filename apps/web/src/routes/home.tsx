@@ -1,3 +1,4 @@
+import { Benday, PRESET_NAMES } from "@registry/ui/benday";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { Link } from "react-router";
@@ -6,7 +7,6 @@ import { Container } from "@/components/container";
 import { PresetCard } from "@/components/preset-card";
 import { Section } from "@/components/section";
 import { ShowcaseControls } from "@/components/showcase-controls";
-import { Benday, PRESET_NAMES } from "@/components/ui/benday";
 import { Button } from "@/components/ui/button";
 import type { ShowcaseSettings } from "@/lib/showcase";
 import { DEFAULT_SHOWCASE } from "@/lib/showcase";

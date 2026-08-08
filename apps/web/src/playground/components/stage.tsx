@@ -1,3 +1,5 @@
+import type { BakeOptions, DotMap } from "@registry/ui/benday";
+import { Benday, useDotMap } from "@registry/ui/benday";
 import {
   RefreshCwIcon,
   RocketIcon,
@@ -6,8 +8,6 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
-import type { BakeOptions, DotMap } from "@/components/ui/benday";
-import { Benday, useDotMap } from "@/components/ui/benday";
 import { AgentPreview } from "@/playground/components/agent-preview";
 import { LoaderButton } from "@/playground/components/loader-button";
 import { gridForSize } from "@/playground/lib/grid";
