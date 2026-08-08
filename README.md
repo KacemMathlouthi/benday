@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="apps/web/public/icon.svg" width="76" alt="benday" />
+<img src="apps/web/public/favicon.svg" width="72" alt="benday" />
 
 # benday
 
@@ -15,7 +15,7 @@
 ## Install
 
 ```bash
-bunx shadcn@latest add https://benday.kacemmathlouthi.dev/r/benday.json
+bunx shadcn@latest add @benday/benday
 ```
 
 ```tsx
@@ -44,14 +44,7 @@ Seven files land in your project and belong to you. Only React is required — t
 
 The image is rasterized once, ink separated from background by alpha or luminance, then a Euclidean distance transform gives every dot its depth inside the mark. That dot map is all the renderer animates — cached by source, paused off-screen, honouring reduced motion, resolving `currentColor` against the canvas.
 
-## Short address
-
-`@benday/benday` works once the namespace is registered in your project. Namespaces are decentralized; nobody has to approve one.
-
-```bash
-bunx shadcn@latest registry add '@benday=https://benday.kacemmathlouthi.dev/r/{name}.json'
-bunx shadcn@latest add @benday/benday
-```
+Bake at build time and pass `dotMap` instead of `src` to skip the work entirely.
 
 ## Repository
 
