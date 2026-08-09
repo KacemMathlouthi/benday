@@ -1,7 +1,7 @@
 import type { RenderState } from "@/playground/lib/state";
 
 /** The smallest dot that still reads as one; below it the disc goes to smudge. */
-const MIN_DOT_PX = 0.5;
+const MIN_DOT_PX = 0.9;
 
 /** Coarsest grid worth baking — below this a logo stops being recognisable. */
 const MIN_GRID = 3;

@@ -10,7 +10,7 @@ import type { LogoProps } from "@/playground/lib/logo-props";
 const WORK_MS = 2600;
 
 /** The glyph box both the icon and the mark are drawn into. */
-const ICON_PX = 18;
+const ICON_PX = 20;
 
 /**
  * A button whose icon morphs into the thinking dots while it works, via
@@ -45,9 +45,14 @@ export function LoaderButton({
 
   return (
     <Button
-      className="h-9 w-40 gap-2 px-3.5 text-sm"
-      disabled={busy}
+      aria-busy={busy}
+      aria-disabled={busy}
+      className="h-9 w-40 gap-2 px-3.5 text-sm shadow-xs data-[busy=true]:bg-muted/70 dark:data-[busy=true]:bg-input/60"
+      data-busy={busy}
       onClick={() => {
+        if (busy) {
+          return;
+        }
         setBusy(true);
         timer.current = setTimeout(() => setBusy(false), WORK_MS);
       }}
@@ -65,6 +70,7 @@ export function LoaderButton({
         <span className="t-icon flex items-center justify-center" data-icon="b">
           <Benday
             {...logo}
+            aria-hidden
             dotMap={dotMap ?? undefined}
             size={ICON_PX}
             state={busy ? "thinking" : "done"}

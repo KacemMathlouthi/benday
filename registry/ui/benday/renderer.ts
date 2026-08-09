@@ -136,8 +136,13 @@ export function createRenderer(
         y: dot.y,
       };
     });
+    const opticalSize =
+      opts.fit === "natural"
+        ? Math.min(opts.size, opts.size / safeAspect(map))
+        : opts.size;
+    const optical = opticalFactor(opticalSize);
     toneScales = display.dots.map((dot) =>
-      toneScale(dot.v, dot.t, dot.d, opts.weight)
+      toneScale(dot.v, dot.t, dot.d, opts.weight, optical)
     );
   }
 
@@ -156,12 +161,15 @@ export function createRenderer(
     canvas.style.width = `${cssWidth}px`;
     canvas.style.height = `${cssHeight}px`;
 
-    const availableWidth = cssWidth * (1 - opts.padding * 2);
-    const availableHeight = cssHeight * (1 - opts.padding * 2);
+    const padding = opticalPadding(opts.padding, Math.min(cssWidth, cssHeight));
+    const availableWidth = cssWidth * (1 - padding * 2);
+    const availableHeight = cssHeight * (1 - padding * 2);
     cell = Math.min(availableWidth / cols, availableHeight / rows);
     originX = (cssWidth - cell * cols) / 2;
     originY = (cssHeight - cell * rows) / 2;
-    baseRadius = (cell * opts.dotScale) / 2;
+    baseRadius =
+      ((cell * opts.dotScale) / 2) *
+      (1 + opticalFactor(Math.min(cssWidth, cssHeight)) * 0.25);
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -177,17 +185,20 @@ export function createRenderer(
     }
 
     ctx.fillStyle = ink;
-    if (opts.glow > 0) {
+    const optical = opticalFactor(Math.min(cssWidth, cssHeight));
+    if (opts.glow > 0 || optical > 0) {
       ctx.shadowColor = ink;
-      ctx.shadowBlur = baseRadius * 4 * opts.glow;
+      ctx.shadowBlur = baseRadius * (4 * opts.glow + optical * 1.1);
+      ctx.shadowOffsetY = optical * 0.2;
     } else {
       ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
     }
 
     const run = presetFn();
     const cols = displayCols;
     const rows = displayRows;
-    const motion = 1 - settle;
+    const motion = (1 - settle) * (1 - optical * 0.65);
 
     for (let i = 0; i < dots.length; i++) {
       const dot = dots[i] as DotContext;
@@ -198,8 +209,10 @@ export function createRenderer(
       run(dot, clock, frame);
 
       // settle = 1 is the crisp logo; blend every channel toward it.
-      const scale = frame.s + (1 - frame.s) * settle;
-      const alpha = frame.a + (1 - frame.a) * settle;
+      const settledScale = frame.s + (1 - frame.s) * settle;
+      const settledAlpha = frame.a + (1 - frame.a) * settle;
+      const scale = settledScale + (1 - settledScale) * optical * 0.55;
+      const alpha = settledAlpha + (1 - settledAlpha) * optical * 0.8;
       const radius =
         baseRadius * scale * (toneScales[i] as number) * shapeScale(opts.shape);
       if (radius <= 0.05) {
@@ -222,6 +235,7 @@ export function createRenderer(
 
     ctx.globalAlpha = 1;
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
   }
 
   function settleTarget(): number {
@@ -394,9 +408,9 @@ function buildDisplayMap(
     return source;
   }
 
-  const padding = clamp(opts.padding, 0, 0.49);
   const width = Math.max(1, opts.size);
   const height = opts.fit === "natural" ? width / safeAspect(map) : width;
+  const padding = opticalPadding(opts.padding, Math.min(width, height));
   const cell = Math.min(
     (width * (1 - padding * 2)) / sourceCols,
     (height * (1 - padding * 2)) / sourceRows
@@ -473,16 +487,27 @@ function toneScale(
   coverage: number,
   sourceTone: number,
   distance: number,
-  weight: number
+  weight: number,
+  optical: number
 ): number {
   const weightedCoverage =
     1 - clamp01(weight) + clamp01(weight) * clamp01(coverage);
   const d = clamp01(distance);
   const smoothDepth = d * d * (3 - 2 * d);
   const depthTone = 0.72 + smoothDepth * 0.38;
-  const layerTone = 0.18 + clamp01(sourceTone) * 0.82;
+  const layerFloor = 0.18 + optical * 0.14;
+  const layerTone = layerFloor + clamp01(sourceTone) * (1 - layerFloor);
   const tone = weightedCoverage * layerTone * (0.82 + depthTone * 0.18);
   return Math.sqrt(clamp01(tone));
+}
+
+/** Small marks need optical weight and restrained motion to remain identifiable. */
+function opticalFactor(size: number): number {
+  return clamp01((32 - size) / 16);
+}
+
+function opticalPadding(padding: number, size: number): number {
+  return clamp(padding, 0, 0.49) * (1 - opticalFactor(size) * 0.65);
 }
 
 /** Keep circle, square and diamond at equal painted area for the same tone. */

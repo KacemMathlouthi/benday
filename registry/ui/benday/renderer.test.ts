@@ -5,8 +5,14 @@ import { describe, expect, test } from "bun:test";
 import { createRenderer } from "./renderer";
 import type { DotMap, DotShape } from "./types";
 
-globalThis.cancelAnimationFrame = () => null;
-globalThis.requestAnimationFrame = () => 1;
+let pendingFrame: FrameRequestCallback | null = null;
+globalThis.cancelAnimationFrame = () => {
+  pendingFrame = null;
+};
+globalThis.requestAnimationFrame = (callback) => {
+  pendingFrame = callback;
+  return 1;
+};
 
 interface Paint {
   alpha: number;
@@ -163,6 +169,32 @@ describe("registry renderer fidelity", () => {
     });
 
     expect(paints).toHaveLength(13 * 13);
+  });
+
+  test("keeps a small animated mark legible at the quietest preset frame", () => {
+    const { canvas, paints } = makeCanvas();
+
+    createRenderer(canvas, {
+      ...staticOptions,
+      dotMap: fullMap(1, 1),
+      preset: (_dot, _time, frame) => {
+        frame.a = 0;
+        frame.s = 0.2;
+      },
+      reducedMotion: false,
+      size: 16,
+      state: "thinking",
+    });
+
+    for (let frame = 1; frame <= 120; frame++) {
+      const frameHandler = pendingFrame;
+      pendingFrame = null;
+      if (frameHandler) {
+        frameHandler(frame * (1000 / 60));
+      }
+    }
+
+    expect(paints.at(-1)?.alpha).toBeGreaterThanOrEqual(0.8);
   });
 
   test("uses the source aspect rather than the rounded grid ratio", () => {
