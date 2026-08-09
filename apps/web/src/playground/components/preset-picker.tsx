@@ -84,7 +84,7 @@ export function PresetPicker({
           render={
             <button
               aria-label={`Select preset, current: ${selected.label}`}
-              className="flex h-11 w-full items-center gap-2.5 border border-input px-3 text-left text-sm outline-none transition-colors hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50"
+              className="flex h-11 w-full min-w-0 max-w-full items-center gap-2.5 overflow-hidden border border-input px-3 text-left text-sm outline-none transition-colors hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50"
               id="preset"
               type="button"
             />
@@ -100,7 +100,7 @@ export function PresetPicker({
 
         <DialogContent
           aria-describedby={undefined}
-          className="gap-0 overflow-hidden p-0 sm:max-w-2xl"
+          className="flex max-h-[calc(100svh-1rem)] w-[calc(100vw-1rem)] min-w-0 max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden p-0 sm:w-full sm:max-w-2xl"
           showCloseButton={false}
         >
           <DialogTitle className="sr-only">Select a preset</DialogTitle>
@@ -121,14 +121,14 @@ export function PresetPicker({
             </span>
           </div>
 
-          <div className="themed-scrollbar max-h-[min(34rem,70vh)] overflow-y-auto p-2">
+          <div className="themed-scrollbar min-h-0 max-w-full flex-1 overflow-x-hidden overflow-y-auto p-1.5 sm:max-h-[min(34rem,70vh)] sm:p-2">
             {groups.length === 0 ? (
               <p className="px-3 py-10 text-center text-muted-foreground text-sm">
                 No presets found.
               </p>
             ) : (
               groups.map((group) => (
-                <section key={group.family}>
+                <section className="min-w-0 max-w-full" key={group.family}>
                   <h3 className="sticky top-0 z-10 bg-popover/95 px-2 py-2 font-medium text-[10px] text-muted-foreground uppercase tracking-wider backdrop-blur-sm">
                     {group.family}
                   </h3>
@@ -140,7 +140,7 @@ export function PresetPicker({
                         <button
                           aria-pressed={active}
                           className={cn(
-                            "flex w-full items-center gap-4 px-3 py-3 text-left outline-none transition-colors hover:bg-accent focus-visible:bg-accent",
+                            "flex w-full min-w-0 max-w-full items-center gap-3 overflow-hidden px-2 py-2.5 text-left outline-none transition-colors hover:bg-accent focus-visible:bg-accent sm:gap-4 sm:px-3 sm:py-3",
                             active && "bg-accent/60"
                           )}
                           key={preset}
@@ -151,7 +151,7 @@ export function PresetPicker({
                           }}
                           type="button"
                         >
-                          <span className="flex size-16 shrink-0 items-center justify-center border border-border bg-background/50">
+                          <span className="flex size-14 shrink-0 items-center justify-center border border-border bg-background/50 sm:size-16">
                             {preview(preset, 48)}
                           </span>
                           <span className="min-w-0 flex-1">
