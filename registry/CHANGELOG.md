@@ -1,5 +1,11 @@
 # benday
 
+## 0.3.0
+
+### Minor Changes
+
+- 17bc4cf: Add fourteen logo-preserving animation presets organized into signature, sweep, orbit, field, and transform families.
+
 ## 0.2.0
 
 ### Minor Changes
