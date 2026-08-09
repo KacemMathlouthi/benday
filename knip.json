@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "workspaces": {
     "registry": {
-      "entry": ["ui/benday.tsx"],
+      "entry": ["ui/benday.tsx", "ui/**/*.test.ts"],
       "project": ["**/*.{ts,tsx}"]
     },
     "apps/web": {

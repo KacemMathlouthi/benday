@@ -8,8 +8,10 @@ export interface Dot {
   x: number;
   /** Cell-center y, normalized 0..1 across the trimmed content box. */
   y: number;
-  /** Ink coverage of the cell, 0..1 (post-gamma). Drives dot size/alpha weighting. */
+  /** Ink coverage of the cell, 0..1 (post-gamma). Drives the dot's painted area. */
   v: number;
+  /** Source tone, 0 for the weakest layer and 1 for the strongest layer. */
+  t: number;
   /** Depth inside the shape, 0 at the outline → 1 at the thickest point (from the EDT). */
   d: number;
 }
@@ -76,6 +78,8 @@ export interface DotContext {
   angle: number;
   /** Ink coverage, 0..1. */
   v: number;
+  /** Source tone, 0..1. */
+  t: number;
   /** Depth inside the shape, 0 at the outline → 1 at the core. */
   d: number;
   /** Stable pseudo-random value for this dot, 0..1. */
@@ -137,7 +141,7 @@ export interface RendererOptions {
   glow?: number;
   /** Inset around the mark as a fraction of the box. @default 0.06 */
   padding?: number;
-  /** How strongly ink coverage drives per-dot size and alpha, 0..1. @default 0.5 */
+  /** How strongly ink coverage drives each dot's painted area, 0..1. @default 0.5 */
   weight?: number;
   /** Freeze on the current frame. @default false */
   paused?: boolean;

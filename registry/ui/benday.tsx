@@ -140,10 +140,7 @@ export function Benday({
   ]);
 
   // Reserve the box before the renderer sizes the canvas, so nothing shifts.
-  const height =
-    fit === "natural" && dotMap
-      ? Math.round((size * dotMap.rows) / Math.max(1, dotMap.cols))
-      : size;
+  const height = fit === "natural" && dotMap ? size / safeAspect(dotMap) : size;
 
   return (
     <canvas
@@ -188,3 +185,9 @@ export type {
 } from "./benday/types";
 export { useDotMap } from "./benday/use-dot-map";
 export type { UseDotMapResult } from "./benday/use-dot-map";
+
+function safeAspect(dotMap: DotMap): number {
+  return Number.isFinite(dotMap.aspect) && dotMap.aspect > 0
+    ? dotMap.aspect
+    : dotMap.cols / Math.max(1, dotMap.rows);
+}

@@ -10,6 +10,7 @@ import { PRESETS, dotRandom } from "./presets";
 import type {
   DotContext,
   DotFrame,
+  DotMap,
   DotShape,
   Preset,
   Renderer,
@@ -38,9 +39,11 @@ export const DEFAULT_RENDERER_OPTIONS: ResolvedRendererOptions = {
 const STIFFNESS = 140;
 const DAMPING = 20;
 const MAX_TIMESTEP = 0.05;
+/** Below this, separate cells become subpixel haze rather than a dot lattice. */
+const MIN_AUTO_CELL_PX = 1.5;
 
 /** Options whose change invalidates the cached per-dot contexts. */
-const DERIVED_KEYS = ["dotMap", "weight"] as const;
+const DERIVED_KEYS = ["dotMap", "fit", "padding", "size", "weight"] as const;
 /** Options whose change invalidates the cached canvas geometry. */
 const LAYOUT_KEYS = ["dotMap", "size", "fit", "padding", "dotScale"] as const;
 
@@ -65,7 +68,9 @@ export function createRenderer(
 
   // Caches, rebuilt only when their inputs change.
   let dots: DotContext[] = [];
-  let weights: number[] = [];
+  let toneScales: number[] = [];
+  let displayCols = 1;
+  let displayRows = 1;
   let ink = "#000";
   let cssWidth = 0;
   let cssHeight = 0;
@@ -102,42 +107,48 @@ export function createRenderer(
     const map = opts.dotMap;
     if (!map) {
       dots = [];
-      weights = [];
+      toneScales = [];
+      displayCols = 1;
+      displayRows = 1;
       return;
     }
-    const { cols, rows } = map;
-    dots = map.dots.map((dot, i) => {
+
+    const display = buildDisplayMap(map, opts);
+    displayCols = display.cols;
+    displayRows = display.rows;
+    dots = display.dots.map((dot, i) => {
       const nx = dot.x * 2 - 1;
       const ny = dot.y * 2 - 1;
       return {
         angle: Math.atan2(ny, nx),
-        cols,
+        cols: displayCols,
         d: dot.d,
         i,
-        n: map.dots.length,
+        n: display.dots.length,
         nx,
         ny,
         r: Math.min(1, Math.hypot(nx, ny) / Math.SQRT2),
         rand: dotRandom(i),
-        rows,
+        rows: displayRows,
+        t: dot.t,
         v: dot.v,
         x: dot.x,
         y: dot.y,
       };
     });
-    weights = map.dots.map((dot) => 1 - opts.weight + opts.weight * dot.v);
+    toneScales = display.dots.map((dot) =>
+      toneScale(dot.v, dot.t, dot.d, opts.weight)
+    );
   }
 
   function buildLayout(): void {
     const map = opts.dotMap;
-    const cols = map?.cols ?? 1;
-    const rows = map?.rows ?? 1;
+    const cols = map ? displayCols : 1;
+    const rows = map ? displayRows : 1;
 
     cssWidth = opts.size;
     cssHeight =
-      opts.fit === "natural"
-        ? Math.round((opts.size * rows) / Math.max(1, cols))
-        : opts.size;
+      opts.fit === "natural" ? opts.size / safeAspect(map) : opts.size;
 
     const dpr = devicePixelRatioCapped();
     canvas.width = Math.round(cssWidth * dpr);
@@ -174,8 +185,8 @@ export function createRenderer(
     }
 
     const run = presetFn();
-    const cols = opts.dotMap?.cols ?? 1;
-    const rows = opts.dotMap?.rows ?? 1;
+    const cols = displayCols;
+    const rows = displayRows;
     const motion = 1 - settle;
 
     for (let i = 0; i < dots.length; i++) {
@@ -189,12 +200,12 @@ export function createRenderer(
       // settle = 1 is the crisp logo; blend every channel toward it.
       const scale = frame.s + (1 - frame.s) * settle;
       const alpha = frame.a + (1 - frame.a) * settle;
-      const weight = weights[i] as number;
-      const radius = baseRadius * scale * weight;
+      const radius =
+        baseRadius * scale * (toneScales[i] as number) * shapeScale(opts.shape);
       if (radius <= 0.05) {
         continue;
       }
-      const opacity = Math.min(1, alpha * weight);
+      const opacity = Math.min(1, Math.max(0, alpha));
       if (opacity <= 0.004) {
         continue;
       }
@@ -343,6 +354,153 @@ export function createRenderer(
       sync();
     },
   };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function clamp01(value: number): number {
+  return clamp(value, 0, 1);
+}
+
+interface DisplayDot {
+  d: number;
+  t: number;
+  v: number;
+  x: number;
+  y: number;
+}
+
+interface DisplayMap {
+  cols: number;
+  dots: DisplayDot[];
+  rows: number;
+}
+
+/**
+ * Downsample an over-dense map into a coarser regular lattice. Missing source
+ * dots count as empty cells, so the aggregate retains the source's ink mass
+ * instead of merely making every surviving dot larger.
+ */
+function buildDisplayMap(
+  map: DotMap,
+  opts: ResolvedRendererOptions
+): DisplayMap {
+  const sourceCols = Math.max(1, Math.round(map.cols));
+  const sourceRows = Math.max(1, Math.round(map.rows));
+  const source = { cols: sourceCols, dots: map.dots, rows: sourceRows };
+  if (map.dots.length === 0) {
+    return source;
+  }
+
+  const padding = clamp(opts.padding, 0, 0.49);
+  const width = Math.max(1, opts.size);
+  const height = opts.fit === "natural" ? width / safeAspect(map) : width;
+  const cell = Math.min(
+    (width * (1 - padding * 2)) / sourceCols,
+    (height * (1 - padding * 2)) / sourceRows
+  );
+  if (!Number.isFinite(cell) || cell >= MIN_AUTO_CELL_PX) {
+    return source;
+  }
+
+  const scale = cell / MIN_AUTO_CELL_PX;
+  const cols = Math.max(1, Math.floor(sourceCols * scale));
+  const rows = Math.max(1, Math.floor(sourceRows * scale));
+  if (cols === sourceCols && rows === sourceRows) {
+    return source;
+  }
+
+  const bins = Array.from({ length: cols * rows }, () => ({
+    depth: 0,
+    ink: 0,
+    tone: 0,
+  }));
+  for (const dot of map.dots) {
+    const sourceCol = clamp(Math.floor(dot.col), 0, sourceCols - 1);
+    const sourceRow = clamp(Math.floor(dot.row), 0, sourceRows - 1);
+    const col = Math.min(cols - 1, Math.floor((sourceCol * cols) / sourceCols));
+    const row = Math.min(rows - 1, Math.floor((sourceRow * rows) / sourceRows));
+    const bin = bins[row * cols + col];
+    if (!bin) {
+      continue;
+    }
+    const coverage = clamp01(dot.v);
+    bin.ink += coverage;
+    bin.depth += clamp01(dot.d) * coverage;
+    bin.tone += clamp01(dot.t) * coverage;
+  }
+
+  const dots: DisplayDot[] = [];
+  for (let row = 0; row < rows; row++) {
+    const sourceRowStart = Math.ceil((row * sourceRows) / rows);
+    const sourceRowEnd = Math.ceil(((row + 1) * sourceRows) / rows);
+    for (let col = 0; col < cols; col++) {
+      const bin = bins[row * cols + col];
+      if (!bin || bin.ink <= 0) {
+        continue;
+      }
+      const sourceColStart = Math.ceil((col * sourceCols) / cols);
+      const sourceColEnd = Math.ceil(((col + 1) * sourceCols) / cols);
+      const sourceCells = Math.max(
+        1,
+        (sourceColEnd - sourceColStart) * (sourceRowEnd - sourceRowStart)
+      );
+      const coverage = clamp01(bin.ink / sourceCells);
+      if (coverage <= 0.004) {
+        continue;
+      }
+      dots.push({
+        d: bin.depth / bin.ink,
+        t: bin.tone / bin.ink,
+        v: coverage,
+        x: (col + 0.5) / cols,
+        y: (row + 0.5) / rows,
+      });
+    }
+  }
+
+  return { cols, dots, rows };
+}
+
+/**
+ * A halftone represents coverage through area: radius therefore follows the
+ * square root of tone. Opacity remains available to the animation instead of
+ * applying coverage twice (radius, then alpha), which used to erase fine ink.
+ */
+function toneScale(
+  coverage: number,
+  sourceTone: number,
+  distance: number,
+  weight: number
+): number {
+  const weightedCoverage =
+    1 - clamp01(weight) + clamp01(weight) * clamp01(coverage);
+  const d = clamp01(distance);
+  const smoothDepth = d * d * (3 - 2 * d);
+  const depthTone = 0.72 + smoothDepth * 0.38;
+  const layerTone = 0.18 + clamp01(sourceTone) * 0.82;
+  const tone = weightedCoverage * layerTone * (0.82 + depthTone * 0.18);
+  return Math.sqrt(clamp01(tone));
+}
+
+/** Keep circle, square and diamond at equal painted area for the same tone. */
+function shapeScale(shape: DotShape): number {
+  if (shape === "square") {
+    return Math.sqrt(Math.PI / 4);
+  }
+  if (shape === "diamond") {
+    return Math.sqrt(Math.PI / 2);
+  }
+  return 1;
+}
+
+function safeAspect(map: DotMap | null): number {
+  if (map && Number.isFinite(map.aspect) && map.aspect > 0) {
+    return map.aspect;
+  }
+  return map ? map.cols / Math.max(1, map.rows) : 1;
 }
 
 function drawDot(
