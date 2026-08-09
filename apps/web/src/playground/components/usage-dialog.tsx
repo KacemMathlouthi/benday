@@ -30,7 +30,7 @@ export function UsageDialog({ snippet }: { snippet: string }) {
           <RegistryInstall />
           <CodeBlock code={snippet} filename="usage.tsx" />
           <p className="text-muted-foreground text-xs leading-relaxed">
-            The installed files live in your own <code>components/ui</code>
+            The installed files live in your own <code>components/ui </code>
             directory. Change the presets, renderer or bake pipeline directly.
           </p>
         </div>

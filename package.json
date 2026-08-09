@@ -1,5 +1,5 @@
 {
-  "name": "benday",
+  "name": "benday-workspace",
   "private": true,
   "homepage": "https://benday.kacemmathlouthi.dev",
   "bugs": {
@@ -12,7 +12,8 @@
     "url": "git+https://github.com/KacemMathlouthi/benday.git"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "registry"
   ],
   "type": "module",
   "scripts": {
@@ -21,11 +22,16 @@
     "typecheck": "turbo run typecheck",
     "registry:build": "shadcn build --output apps/web/public/r",
     "check": "ultracite check",
+    "changeset": "changeset",
+    "changeset:status": "changeset status --verbose",
     "fix": "ultracite fix",
     "knip": "knip",
+    "release": "changeset tag",
+    "version-packages": "changeset version",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@types/bun": "^1.3.9",
     "@types/react": "^19.2.18",
     "knip": "^5.66.1",

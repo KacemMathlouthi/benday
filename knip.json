@@ -1,9 +1,9 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "workspaces": {
-    ".": {
-      "entry": ["registry/ui/benday.tsx"],
-      "project": ["registry/**/*.{ts,tsx}"]
+    "registry": {
+      "entry": ["ui/benday.tsx"],
+      "project": ["**/*.{ts,tsx}"]
     },
     "apps/web": {
       "ignore": ["src/components/ui/**", "src/components/ai-elements/**"],

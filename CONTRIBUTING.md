@@ -27,7 +27,10 @@ apps/web/public/r/        generated payloads — never edit by hand
 
 1. Edit under `registry/`.
 2. Run `bun run registry:build`. This regenerates `apps/web/public/r/*.json`.
-3. **Commit the regenerated payloads.** They are what consumers download. CI fails if they drift from the source.
+3. Run `bun run changeset`, choose `benday`, and record the user-facing change.
+4. **Commit the regenerated payloads and changeset.** They are what consumers download and what the next release changelog consumes. CI fails if the payloads drift from the source.
+
+Use a patch changeset for compatible fixes, minor for compatible features such as presets or props, and major for breaking API or output changes. Docs-site and repository-only changes do not need a changeset.
 
 Two things to keep in mind:
 
