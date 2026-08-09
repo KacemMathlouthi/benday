@@ -198,6 +198,75 @@ function buildCoverage(
   return cov;
 }
 
+/**
+ * Preserve visible layers independently from silhouette coverage. Alpha tells
+ * us where artwork exists, but not whether one opaque region is lighter than
+ * another. A robust visible-pixel range turns that source contrast into a
+ * separate 0..1 tone channel. Uniform artwork stays at full tone.
+ */
+function buildTone(img: ImageData, cov: Float32Array): Float32Array {
+  const px = img.data;
+  const histogram = new Float64Array(256);
+  let total = 0;
+  let luminanceSum = 0;
+
+  for (let i = 0, p = 0; p < cov.length; i += 4, p++) {
+    const coverage = cov[p];
+    if (coverage <= 0.02) {
+      continue;
+    }
+    const level = Math.round(luma(px[i], px[i + 1], px[i + 2]) * 255);
+    histogram[level] += coverage;
+    luminanceSum += level * coverage;
+    total += coverage;
+  }
+
+  const tone = new Float32Array(cov.length);
+  if (total === 0) {
+    return tone;
+  }
+
+  const low = histogramPercentile(histogram, total, 0.08);
+  const high = histogramPercentile(histogram, total, 0.92);
+  if (high - low < 18) {
+    for (let p = 0; p < cov.length; p++) {
+      tone[p] = cov[p] > 0.02 ? 1 : 0;
+    }
+    return tone;
+  }
+
+  // White artwork on transparency is as common as black artwork. Let the
+  // dominant half of the source decide which end of its range is strongest.
+  const lightIsStrong = luminanceSum / total > 140;
+  const span = high - low;
+  for (let i = 0, p = 0; p < cov.length; i += 4, p++) {
+    if (cov[p] <= 0.02) {
+      continue;
+    }
+    const level = luma(px[i], px[i + 1], px[i + 2]) * 255;
+    tone[p] = clamp01(
+      lightIsStrong ? (level - low) / span : (high - level) / span
+    );
+  }
+  return tone;
+}
+
+function histogramPercentile(
+  histogram: Float64Array,
+  total: number,
+  percentile: number
+): number {
+  const target = total * percentile;
+  let seen = 0;
+  for (let i = 0; i < histogram.length; i++) {
+    seen += histogram[i];
+    if (seen >= target) {
+      return i;
+    }
+  }
+  return histogram.length - 1;
+}
+
 /** Separable box dilation — grows the mask to rescue hairline strokes. */
 function dilateCoverage(
   cov: Float32Array,
@@ -385,9 +454,10 @@ function findContentBounds(
   };
 }
 
-/** Mean coverage and peak depth per cell, keeping those over the threshold. */
+/** Mean coverage and coverage-weighted depth per cell. */
 function sampleDots(
   cov: Float32Array,
+  tone: Float32Array,
   dist: Float32Array,
   width: number,
   height: number,
@@ -410,13 +480,15 @@ function sampleDots(
 
       let sum = 0;
       let count = 0;
-      let peakDist = 0;
+      let weightedDepth = 0;
+      let weightedTone = 0;
 
       for (let y = y0; y < y1 && y < height; y++) {
         const r = y * width;
         for (let x = x0; x < x1 && x < width; x++) {
           sum += cov[r + x];
-          peakDist = Math.max(peakDist, dist[r + x]);
+          weightedDepth += dist[r + x] * cov[r + x];
+          weightedTone += tone[r + x] * cov[r + x];
           count++;
         }
       }
@@ -431,8 +503,9 @@ function sampleDots(
 
       dots.push({
         col,
-        d: peakDist,
+        d: sum > 0 ? weightedDepth / sum : 0,
         row,
+        t: sum > 0 ? weightedTone / sum : 1,
         v: clamp01(v),
         x: (col + 0.5) / cols,
         y: (row + 0.5) / rows,
@@ -470,6 +543,7 @@ export async function bake(
   const mode = resolveMaskMode(opts.maskMode, data.data);
 
   let cov = buildCoverage(data, width, height, mode, opts.invert);
+  const tone = buildTone(data, cov);
   if (opts.gamma !== 1) {
     const g = Math.max(0.05, opts.gamma);
     for (let i = 0; i < cov.length; i++) {
@@ -495,6 +569,7 @@ export async function bake(
 
   const dots = sampleDots(
     cov,
+    tone,
     dist,
     width,
     height,

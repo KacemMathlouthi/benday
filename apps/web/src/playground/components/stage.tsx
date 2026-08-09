@@ -8,7 +8,10 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
-import { AgentPreview } from "@/playground/components/agent-preview";
+import {
+  AGENT_MARK_SIZE,
+  AgentPreview,
+} from "@/playground/components/agent-preview";
 import { LoaderButton } from "@/playground/components/loader-button";
 import { gridForSize } from "@/playground/lib/grid";
 import { logoProps } from "@/playground/lib/logo-props";
@@ -196,6 +199,7 @@ export function Stage({
 }) {
   const logo = logoProps(render, dotMap);
   const inlineMap = useSizedMap(src, bakeOptions, render, INLINE_SIZE);
+  const agentMap = useSizedMap(src, bakeOptions, render, AGENT_MARK_SIZE);
 
   return (
     <>
@@ -215,7 +219,7 @@ export function Stage({
         lead="Standing in for the spinner in a reasoning, task and message stream."
         title="AI agent"
       >
-        <AgentPreview inlineMap={inlineMap} logo={logo} />
+        <AgentPreview dotMap={agentMap} logo={logo} />
       </Preview>
 
       <Preview lead="Click one to watch the icon morph." title="Loaders">

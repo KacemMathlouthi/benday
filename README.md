@@ -15,7 +15,7 @@
 ## Install
 
 ```bash
-bunx shadcn@latest add @benday/benday
+bunx shadcn@latest add KacemMathlouthi/benday/benday
 ```
 
 ```tsx

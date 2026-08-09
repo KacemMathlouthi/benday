@@ -1,4 +1,4 @@
-import type { DotMap } from "@registry/ui/benday";
+import type { BendayState, DotMap } from "@registry/ui/benday";
 import { Benday } from "@registry/ui/benday";
 import { useEffect, useState } from "react";
 
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import type { LogoProps } from "@/playground/lib/logo-props";
 
 /** The indicator size across this section — big enough to read as the mark. */
-const MARK_SIZE = 24;
+export const AGENT_MARK_SIZE = 24;
 
 const REASONING_TEXT = [
   "Let me think about this step by step.",
@@ -67,14 +67,46 @@ function useLoop(length: number, tickMs: number, holdMs: number): number {
   return index;
 }
 
-function ReasoningMock({ mark }: { mark: React.ReactNode }) {
+function AgentMark({
+  dotMap,
+  logo,
+  state,
+}: {
+  dotMap: DotMap | null;
+  logo: LogoProps;
+  state: BendayState;
+}) {
+  return (
+    <span className="inline-flex shrink-0 text-foreground">
+      <Benday
+        {...logo}
+        aria-hidden
+        dotMap={dotMap ?? undefined}
+        size={AGENT_MARK_SIZE}
+        state={state}
+      />
+    </span>
+  );
+}
+
+function ReasoningMock({
+  dotMap,
+  logo,
+}: {
+  dotMap: DotMap | null;
+  logo: LogoProps;
+}) {
   const index = useLoop(TOKENS.length, 25, 2400);
   const streaming = index < TOKENS.length;
 
   return (
     <Reasoning className="w-full" isStreaming={streaming} open>
       <ReasoningTrigger>
-        {mark}
+        <AgentMark
+          dotMap={dotMap}
+          logo={logo}
+          state={streaming ? "thinking" : "done"}
+        />
         <span className="text-base text-muted-foreground">
           {streaming ? "Thinking…" : "Thought for 4 seconds"}
         </span>
@@ -91,7 +123,13 @@ function ReasoningMock({ mark }: { mark: React.ReactNode }) {
   );
 }
 
-function TaskMock({ mark }: { mark: React.ReactNode }) {
+function TaskMock({
+  dotMap,
+  logo,
+}: {
+  dotMap: DotMap | null;
+  logo: LogoProps;
+}) {
   const index = useLoop(TASK_STEPS.length, 900, 2400);
 
   return (
@@ -99,7 +137,11 @@ function TaskMock({ mark }: { mark: React.ReactNode }) {
     <Task className="w-full" open>
       <TaskTrigger title="Found project files">
         <div className="flex w-full items-center gap-2 text-base text-muted-foreground">
-          {mark}
+          <AgentMark
+            dotMap={dotMap}
+            logo={logo}
+            state={index < TASK_STEPS.length ? "thinking" : "done"}
+          />
           <span>
             {index < TASK_STEPS.length
               ? "Working…"
@@ -147,36 +189,27 @@ function Row({ children }: { children: React.ReactNode }) {
 
 export function AgentPreview({
   logo,
-  inlineMap,
+  dotMap,
 }: {
   logo: LogoProps;
   /** A map baked for the slot these indicators sit in. */
-  inlineMap: DotMap | null;
+  dotMap: DotMap | null;
 }) {
-  const mark = (
-    <Benday
-      {...logo}
-      dotMap={inlineMap ?? undefined}
-      size={MARK_SIZE}
-      state="thinking"
-    />
-  );
-
   return (
     // Rules span the box, content is a centred column: the block sits in the
     // middle while every line inside starts from the same left edge.
     <div className="flex flex-col divide-y divide-border">
       <Row>
-        <ReasoningMock mark={mark} />
+        <ReasoningMock dotMap={dotMap} logo={logo} />
       </Row>
 
       <Row>
-        <TaskMock mark={mark} />
+        <TaskMock dotMap={dotMap} logo={logo} />
       </Row>
 
       <Row>
         <div className="flex items-center gap-3 text-base text-muted-foreground">
-          {mark}
+          <AgentMark dotMap={dotMap} logo={logo} state="thinking" />
           <span className="whitespace-nowrap">
             Searching the codebase for the auth middleware…
           </span>
