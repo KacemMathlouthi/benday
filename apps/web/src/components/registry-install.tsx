@@ -14,7 +14,7 @@ const MANAGERS = [
 ];
 
 export function RegistryInstall({
-  item = "@benday/benday",
+  item = "KacemMathlouthi/benday/benday",
 }: {
   item?: string;
 }) {
