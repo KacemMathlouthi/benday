@@ -28,15 +28,7 @@ Seven files land in your project and belong to you. Only React is required — t
 
 ## Presets
 
-|           |                                               |
-| --------- | --------------------------------------------- |
-| `contour` | a wave through the mark's own thickness       |
-| `shimmer` | a lit band on the diagonal                    |
-| `ripple`  | concentric rings from the centre              |
-| `scatter` | dots leave the lattice, then reconverge       |
-| `breathe` | the whole mark swells and settles             |
-| `flicker` | a random subset blinks                        |
-| `swirl`   | a twist around the centre, outer dots lagging |
+Twenty-one presets span signature, sweep, orbit, field and transform motion: contour waves, serpentine cascades, radar beams, orbiting comets, equalizers, magnetic pulls, staged resolves and more.
 
 `thinking` runs the preset; `idle` and `done` show the crisp mark, and the dots spring back into it. A preset is a function of one dot and the clock, so write your own.
 

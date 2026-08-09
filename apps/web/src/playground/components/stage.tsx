@@ -12,16 +12,16 @@ import {
   AGENT_MARK_SIZE,
   AgentPreview,
 } from "@/playground/components/agent-preview";
-import { LoaderButton } from "@/playground/components/loader-button";
+import {
+  LoaderButton,
+  LOADER_MARK_SIZE,
+} from "@/playground/components/loader-button";
 import { gridForSize } from "@/playground/lib/grid";
 import { logoProps } from "@/playground/lib/logo-props";
 import type { LogoProps } from "@/playground/lib/logo-props";
 import type { RenderState } from "@/playground/lib/state";
 
 const SIZES = [64, 32, 20];
-
-/** The slot the inline indicators sit in, and so the grid they bake for. */
-const INLINE_SIZE = 18;
 
 const LOADERS = [
   { icon: SparklesIcon, idle: "Generate", working: "Generating" },
@@ -139,9 +139,9 @@ function LoadersPreview({
   inlineMap: DotMap | null;
 }) {
   return (
-    <div className="flex flex-col items-center gap-5 px-6 py-8">
+    <div className="flex flex-col items-center gap-5 px-4 py-8 sm:px-6">
       {/* Equal-width cells, so buttons hold still as their labels change. */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid w-full max-w-[22rem] grid-cols-2 gap-2 sm:gap-3">
         {LOADERS.map((loader) => (
           <LoaderButton
             dotMap={inlineMap}
@@ -198,7 +198,7 @@ export function Stage({
   bakeOptions: BakeOptions;
 }) {
   const logo = logoProps(render, dotMap);
-  const inlineMap = useSizedMap(src, bakeOptions, render, INLINE_SIZE);
+  const inlineMap = useSizedMap(src, bakeOptions, render, LOADER_MARK_SIZE);
   const agentMap = useSizedMap(src, bakeOptions, render, AGENT_MARK_SIZE);
 
   return (

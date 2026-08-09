@@ -109,7 +109,21 @@ export type PresetName =
   | "scatter"
   | "flicker"
   | "breathe"
-  | "swirl";
+  | "swirl"
+  | "scan"
+  | "cascade"
+  | "orbit"
+  | "comet"
+  | "radar"
+  | "pinwheel"
+  | "wave"
+  | "equalizer"
+  | "weave"
+  | "beacon"
+  | "glitch"
+  | "rain"
+  | "magnetic"
+  | "resolve";
 
 export type BendayState = "idle" | "thinking" | "done";
 

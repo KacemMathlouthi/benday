@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import type { LogoProps } from "@/playground/lib/logo-props";
 
 /** The indicator size across this section — big enough to read as the mark. */
-export const AGENT_MARK_SIZE = 24;
+export const AGENT_MARK_SIZE = 28;
 
 const REASONING_TEXT = [
   "Let me think about this step by step.",
@@ -181,7 +181,7 @@ function TaskMock({
 /** A full-bleed band whose content is a centred, left-aligned column. */
 function Row({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-6 py-6">
+    <div className="px-4 py-6 sm:px-6">
       <div className="mx-auto w-full max-w-lg">{children}</div>
     </div>
   );
@@ -210,7 +210,7 @@ export function AgentPreview({
       <Row>
         <div className="flex items-center gap-3 text-base text-muted-foreground">
           <AgentMark dotMap={dotMap} logo={logo} state="thinking" />
-          <span className="whitespace-nowrap">
+          <span className="min-w-0">
             Searching the codebase for the auth middleware…
           </span>
         </div>

@@ -10,7 +10,7 @@ import type { LogoProps } from "@/playground/lib/logo-props";
 const WORK_MS = 2600;
 
 /** The glyph box both the icon and the mark are drawn into. */
-const ICON_PX = 20;
+export const LOADER_MARK_SIZE = 22;
 
 /**
  * A button whose icon morphs into the thinking dots while it works, via
@@ -47,7 +47,7 @@ export function LoaderButton({
     <Button
       aria-busy={busy}
       aria-disabled={busy}
-      className="h-9 w-40 gap-2 px-3.5 text-sm shadow-xs data-[busy=true]:bg-muted/70 dark:data-[busy=true]:bg-input/60"
+      className="h-10 w-full min-w-0 gap-2 px-2.5 text-sm shadow-xs data-[busy=true]:bg-muted/70 sm:gap-2.5 sm:px-4 dark:data-[busy=true]:bg-input/60"
       data-busy={busy}
       onClick={() => {
         if (busy) {
@@ -62,17 +62,17 @@ export function LoaderButton({
       <span
         className="t-icon-swap"
         data-state={busy ? "b" : "a"}
-        style={{ height: ICON_PX, width: ICON_PX }}
+        style={{ height: LOADER_MARK_SIZE, width: LOADER_MARK_SIZE }}
       >
         <span className="t-icon flex items-center justify-center" data-icon="a">
-          <Icon style={{ height: ICON_PX, width: ICON_PX }} />
+          <Icon style={{ height: LOADER_MARK_SIZE, width: LOADER_MARK_SIZE }} />
         </span>
         <span className="t-icon flex items-center justify-center" data-icon="b">
           <Benday
             {...logo}
             aria-hidden
             dotMap={dotMap ?? undefined}
-            size={ICON_PX}
+            size={LOADER_MARK_SIZE}
             state={busy ? "thinking" : "done"}
           />
         </span>
