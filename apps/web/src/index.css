@@ -154,6 +154,28 @@
   }
 }
 
+.themed-scrollbar {
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
+}
+
+.themed-scrollbar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.themed-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.themed-scrollbar::-webkit-scrollbar-thumb {
+  border: 2px solid var(--popover);
+  background: var(--border);
+}
+
+.themed-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
 /* Icon swap (transitions.dev): .t-icon-swap[data-state] over two .t-icon[data-icon]
    children. Both share one grid cell, so the swap costs no layout. */
 :root {

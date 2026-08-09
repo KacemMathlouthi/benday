@@ -222,7 +222,7 @@ export function Usage() {
       </Section>
 
       <Section
-        lead="Same dot map, different motion. Swap the name; nothing else changes."
+        lead="Twenty-one motions across signature, sweep, orbit, field and transform families. Every one preserves your logo."
         title="Presets"
       >
         <div className="overflow-x-auto border border-border">
@@ -240,6 +240,9 @@ export function Usage() {
                     {name}
                   </th>
                   <td className="px-3 py-2.5 text-muted-foreground">
+                    <span className="mr-2 text-[10px] uppercase tracking-wider">
+                      {PRESETS[name].family}
+                    </span>
                     {PRESETS[name].description}
                   </td>
                 </tr>

@@ -163,8 +163,14 @@ export {
 } from "./benday/bake";
 export type { BakeSource } from "./benday/bake";
 export { prefersReducedMotion } from "./benday/dom";
-export { PRESET_NAMES, PRESETS, dotRandom, makeFrame } from "./benday/presets";
-export type { PresetDefinition } from "./benday/presets";
+export {
+  PRESET_FAMILIES,
+  PRESET_NAMES,
+  PRESETS,
+  dotRandom,
+  makeFrame,
+} from "./benday/presets";
+export type { PresetDefinition, PresetFamily } from "./benday/presets";
 export { DEFAULT_RENDERER_OPTIONS, createRenderer } from "./benday/renderer";
 export type {
   BakeOptions,
