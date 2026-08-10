@@ -15,11 +15,11 @@ import { ease, sceneOpacity } from "./math";
 
 const SCENES = {
   close: { duration: 318, from: 1482 },
-  install: { duration: 396, from: 1122 },
+  install: { duration: 360, from: 1122 },
   intro: { duration: 150, from: 0 },
-  presets: { duration: 606, from: 342 },
-  product: { duration: 228, from: 150 },
-  settings: { duration: 246, from: 912 },
+  presets: { duration: 570, from: 342 },
+  product: { duration: 192, from: 150 },
+  settings: { duration: 210, from: 912 },
 } as const;
 
 const base: React.CSSProperties = {
@@ -85,10 +85,9 @@ function IntroScene() {
   const opacity = sceneOpacity(frame, SCENES.intro.duration, 20);
   const copyIn = ease(frame, [10, 38]);
   const lockupIn = ease(frame, [46, 78]);
-  const travel = ease(frame, [112, SCENES.intro.duration], [0, -70]);
 
   return (
-    <AbsoluteFill style={{ opacity, transform: `translateX(${travel}px)` }}>
+    <AbsoluteFill style={{ opacity }}>
       <div
         style={{
           alignItems: "center",
@@ -111,6 +110,7 @@ function IntroScene() {
               letterSpacing: "-0.035em",
               lineHeight: 1,
               marginBottom: 24,
+              textAlign: "center",
             }}
           >
             Introducing
@@ -142,19 +142,9 @@ function IntroScene() {
 function ProductScene() {
   const frame = useCurrentFrame();
   const opacity = sceneOpacity(frame, SCENES.product.duration, 18);
-  const enter = ease(frame, [8, 34]);
-  const exit = ease(frame, [
-    SCENES.product.duration - 36,
-    SCENES.product.duration,
-  ]);
 
   return (
-    <AbsoluteFill
-      style={{
-        opacity,
-        transform: `translateX(${56 - enter * 56 - exit * 120}px)`,
-      }}
-    >
+    <AbsoluteFill style={{ opacity }}>
       <div
         style={{
           alignItems: "center",
@@ -200,7 +190,11 @@ const TILE_HEIGHT = 300;
 function PresetWall() {
   const frame = useCurrentFrame();
   const opacity = sceneOpacity(frame, SCENES.presets.duration, 18);
-  const track = ease(frame, [18, 588], [0, -TILE_WIDTH * 4]);
+  const track = ease(
+    frame,
+    [18, SCENES.presets.duration - 18],
+    [0, -TILE_WIDTH * 4]
+  );
 
   return (
     <AbsoluteFill style={{ opacity }}>
@@ -298,9 +292,9 @@ function SettingsScene() {
 
         <div style={{ height: 140, position: "relative" }}>
           {SETTING_WORDS.map((word, index) => {
-            const from = 28 + index * 30;
+            const from = 22 + index * 27;
             const isLast = index === SETTING_WORDS.length - 1;
-            const to = isLast ? 228 : from + 40;
+            const to = isLast ? SCENES.settings.duration - 18 : from + 40;
             const wordOpacity = Math.min(
               ease(frame, [from, from + 8]),
               ease(frame, [to - 8, to], [1, 0])
