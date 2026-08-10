@@ -1,0 +1,51 @@
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+@font-face {
+  font-family: "Geist Pixel Circle";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("../../../web/src/fonts/GeistPixel-Circle.woff2") format("woff2");
+}
+
+:root {
+  --background: #000000;
+  --foreground: #ededed;
+  --surface: #0a0a0a;
+  --surface-raised: #1f1f1f;
+  --muted: #a1a1a1;
+  --border: #292929;
+  --input: #333333;
+  --font-sans: "Geist Variable", Arial, sans-serif;
+  --font-mono: "Geist Mono Variable", monospace;
+  --font-pixel: "Geist Pixel Circle", "Geist Variable", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.launch-lockup {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  color: var(--foreground);
+}
+
+.launch-lockup > svg {
+  display: none;
+}
+
+.launch-lockup > span {
+  font-family: var(--font-pixel);
+  font-size: 86px;
+  line-height: 1;
+}

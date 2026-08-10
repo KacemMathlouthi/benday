@@ -1,6 +1,13 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "workspaces": {
+    "apps/launch-video": {
+      "entry": ["src/index.ts", "remotion.config.ts"],
+      "ignoreDependencies": [
+        "@fontsource-variable/geist",
+        "@fontsource-variable/geist-mono"
+      ]
+    },
     "registry": {
       "entry": ["ui/benday.tsx", "ui/**/*.test.ts"],
       "project": ["**/*.{ts,tsx}"]

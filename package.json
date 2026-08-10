@@ -27,6 +27,9 @@
     "fix": "ultracite fix",
     "knip": "knip",
     "release": "changeset tag",
+    "video:render": "bun --cwd apps/launch-video run render",
+    "video:still": "bun --cwd apps/launch-video run still",
+    "video:studio": "bun --cwd apps/launch-video run dev",
     "version-packages": "changeset version",
     "clean": "turbo run clean && rm -rf node_modules"
   },
