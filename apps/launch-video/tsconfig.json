@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "paths": {
+      "@registry/*": ["../../registry/*"],
+      "@web/*": ["../web/src/*"]
+    }
+  },
+  "include": [
+    "src",
+    "remotion.config.ts",
+    "../../registry",
+    "../web/src/components/logo.tsx"
+  ]
+}

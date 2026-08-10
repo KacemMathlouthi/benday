@@ -5,6 +5,7 @@ dist
 .DS_Store
 *.log
 .playwright-mcp
+apps/launch-video/out
 
 # Local-only source for the OG card; the rendered og.png is what ships.
 scripts/og-card.html
