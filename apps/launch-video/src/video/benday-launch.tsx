@@ -120,8 +120,8 @@ function IntroScene() {
               alignItems: "center",
               display: "flex",
               fontFamily: "var(--font-pixel)",
-              fontSize: 168,
-              gap: 34,
+              fontSize: 210,
+              gap: 42,
               lineHeight: 0.9,
               opacity: lockupIn,
               transform: `translateX(${(1 - lockupIn) * -24}px)`,
@@ -129,7 +129,7 @@ function IntroScene() {
           >
             <Img
               src={staticFile("icon.svg")}
-              style={{ height: 156, width: 156 }}
+              style={{ height: 198, width: 198 }}
             />
             benday
           </div>
@@ -274,6 +274,7 @@ const SETTING_WORDS = [
 function SettingsScene() {
   const frame = useCurrentFrame();
   const opacity = sceneOpacity(frame, SCENES.settings.duration, 18);
+  const headerIn = ease(frame, [10, 22]);
 
   return (
     <AbsoluteFill style={{ opacity }}>
@@ -290,35 +291,49 @@ function SettingsScene() {
           <FrameBenday preset="contour" size={420} speed={0.95} />
         </div>
 
-        <div style={{ height: 140, position: "relative" }}>
-          {SETTING_WORDS.map((word, index) => {
-            const from = 22 + index * 27;
-            const isLast = index === SETTING_WORDS.length - 1;
-            const to = isLast ? SCENES.settings.duration - 18 : from + 40;
-            const wordOpacity = Math.min(
-              ease(frame, [from, from + 8]),
-              ease(frame, [to - 8, to], [1, 0])
-            );
-            const x = (1 - ease(frame, [from, from + 10])) * 28;
-            return (
-              <div
-                key={word}
-                style={{
-                  color: isLast ? "var(--muted)" : "var(--foreground)",
-                  fontSize: isLast ? 76 : 108,
-                  fontWeight: 430,
-                  letterSpacing: "-0.055em",
-                  lineHeight: 1,
-                  opacity: wordOpacity,
-                  position: "absolute",
-                  transform: `translateX(${x}px)`,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {word}
-              </div>
-            );
-          })}
+        <div>
+          <div
+            style={{
+              color: "var(--muted)",
+              fontSize: 30,
+              letterSpacing: "-0.03em",
+              lineHeight: 1,
+              opacity: headerIn,
+            }}
+          >
+            You can customize
+          </div>
+
+          <div style={{ height: 140, marginTop: 28, position: "relative" }}>
+            {SETTING_WORDS.map((word, index) => {
+              const from = 24 + index * 28;
+              const to = from + 28;
+              const isLast = index === SETTING_WORDS.length - 1;
+              const wordOpacity = Math.min(
+                ease(frame, [from, from + 6]),
+                ease(frame, [to - 6, to], [1, 0])
+              );
+              const x = (1 - ease(frame, [from, from + 8])) * 28;
+              return (
+                <div
+                  key={word}
+                  style={{
+                    color: isLast ? "var(--muted)" : "var(--foreground)",
+                    fontSize: isLast ? 76 : 108,
+                    fontWeight: 430,
+                    letterSpacing: "-0.055em",
+                    lineHeight: 1,
+                    opacity: wordOpacity,
+                    position: "absolute",
+                    transform: `translateX(${x}px)`,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {word}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </AbsoluteFill>
