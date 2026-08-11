@@ -2,8 +2,8 @@
 
 import { describe, expect, test } from "bun:test";
 
-import { createRenderer } from "./renderer";
-import type { DotMap, DotShape } from "./types";
+import { createRenderer } from "../ui/benday/renderer";
+import type { DotMap, DotShape } from "../ui/benday/types";
 
 let pendingFrame: FrameRequestCallback | null = null;
 globalThis.cancelAnimationFrame = () => {
