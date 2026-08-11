@@ -19,14 +19,6 @@ export const DEFAULT_SHOWCASE: ShowcaseSettings = {
   speed: 1.25,
 };
 
-export const SHOWCASE_COLORS = [
-  { label: "Ink", value: "currentColor" },
-  { label: "Violet", value: "#8b5cf6" },
-  { label: "Amber", value: "#f59e0b" },
-  { label: "Emerald", value: "#10b981" },
-  { label: "Rose", value: "#f43f5e" },
-];
-
 export const SHOWCASE_SHAPES: { label: string; value: DotShape }[] = [
   { label: "Circle", value: "circle" },
   { label: "Square", value: "square" },
