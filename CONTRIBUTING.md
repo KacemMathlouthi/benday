@@ -9,7 +9,7 @@ bun install
 bun run dev
 ```
 
-`dev` builds the registry and starts the docs site and playground at `localhost:5173`.
+`dev` builds the registry and starts the docs site and playground at `localhost:5173`. The launch video is its own app and stays out of the way — `bun run video:studio` opens Remotion Studio when you actually want it.
 
 ## Layout
 
@@ -19,6 +19,7 @@ registry/ui/benday/       bake, renderer, presets, React binding
 registry.json             the registry source catalog
 apps/web/                 docs site and playground
 apps/web/public/r/        generated payloads — never edit by hand
+apps/launch-video/        the Remotion launch film, run on its own
 ```
 
 `registry/` mirrors the tree the shadcn CLI writes into a consumer's project. That is why the imports inside it are relative (`./benday/renderer`) rather than aliased: an alias would be meaningless once the files land somewhere else. The docs app reaches them through `@registry/*`, so the site renders the same source it distributes.
