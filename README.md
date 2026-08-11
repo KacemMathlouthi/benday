@@ -15,7 +15,7 @@
 ## Install
 
 ```bash
-bunx shadcn@latest add KacemMathlouthi/benday/benday
+bunx shadcn@latest add @benday/benday
 ```
 
 ```tsx
@@ -24,7 +24,7 @@ import { Benday } from "@/components/ui/benday";
 <Benday src="/logo.svg" state={isThinking ? "thinking" : "done"} />;
 ```
 
-Seven files land in your project and belong to you. Only React is required — there is no package to depend on.
+Seven files land in your project and belong to you. Only React is required — there is no package to depend on. `@benday` is a namespace in [shadcn's registry directory](https://github.com/shadcn-ui/ui/pull/11447), so there is nothing to add to `components.json`.
 
 ## Presets
 

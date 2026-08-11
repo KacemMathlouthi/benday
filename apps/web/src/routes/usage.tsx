@@ -153,7 +153,7 @@ const MANUAL = `components/ui/
 └── benday/
     ├── bake.ts         image → dot map
     ├── dom.ts          colour, theme, visibility, DPR
-    ├── presets.ts      the seven animations
+    ├── presets.ts      the twenty-one animations
     ├── renderer.ts     the canvas painter
     ├── types.ts        every exported type
     └── use-dot-map.ts  the React binding`;
@@ -172,7 +172,9 @@ export function Usage() {
       >
         <RegistryInstall />
         <Note>
-          The code lands at <code>components/ui/benday.tsx</code> and{" "}
+          <code>@benday</code> is a namespace in shadcn&rsquo;s registry
+          directory, so nothing goes in your <code>components.json</code>. The
+          code lands at <code>components/ui/benday.tsx</code> and{" "}
           <code>components/ui/benday/*</code>, and is yours to edit.
         </Note>
       </Section>
