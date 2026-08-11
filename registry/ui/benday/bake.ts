@@ -20,6 +20,15 @@ const clamp = (v: number, lo: number, hi: number) =>
   Math.min(hi, Math.max(lo, v));
 const clamp01 = (v: number) => clamp(v, 0, 1);
 
+function smoothstep(edge0: number, edge1: number, value: number): number {
+  const x = clamp01((value - edge0) / (edge1 - edge0));
+  return x * x * (3 - 2 * x);
+}
+
+/** Luminance spread, in levels, over which layers go from flat to fully separated. */
+const TONE_SPREAD_MIN = 16;
+const TONE_SPREAD_FULL = 200;
+
 export function resolveBakeOptions(
   options: BakeOptions = {}
 ): ResolvedBakeOptions {
@@ -228,7 +237,13 @@ function buildTone(img: ImageData, cov: Float32Array): Float32Array {
 
   const low = histogramPercentile(histogram, total, 0.08);
   const high = histogramPercentile(histogram, total, 0.92);
-  if (high - low < 18) {
+  const span = high - low;
+
+  // Stretching the source's own range to a full 0..1 manufactures contrast: two
+  // brand colours a few levels apart came out one at full strength and one on
+  // the floor. Apply the range in proportion to the separation that is there.
+  const separation = smoothstep(TONE_SPREAD_MIN, TONE_SPREAD_FULL, span);
+  if (separation <= 0) {
     for (let p = 0; p < cov.length; p++) {
       tone[p] = cov[p] > 0.02 ? 1 : 0;
     }
@@ -238,15 +253,15 @@ function buildTone(img: ImageData, cov: Float32Array): Float32Array {
   // White artwork on transparency is as common as black artwork. Let the
   // dominant half of the source decide which end of its range is strongest.
   const lightIsStrong = luminanceSum / total > 140;
-  const span = high - low;
   for (let i = 0, p = 0; p < cov.length; i += 4, p++) {
     if (cov[p] <= 0.02) {
       continue;
     }
     const level = luma(px[i], px[i + 1], px[i + 2]) * 255;
-    tone[p] = clamp01(
+    const normalized = clamp01(
       lightIsStrong ? (level - low) / span : (high - level) / span
     );
+    tone[p] = 1 - separation * (1 - normalized);
   }
   return tone;
 }

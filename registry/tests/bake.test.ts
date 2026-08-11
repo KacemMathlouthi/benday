@@ -172,8 +172,11 @@ describe("bake", () => {
       grid: 8,
     });
 
-    expect(dotAt(map, 0, 4).t).toBeCloseTo(1, 1);
-    expect(dotAt(map, 7, 4).t).toBeCloseTo(0, 1);
+    expect(dotAt(map, 0, 4).t).toBeCloseTo(1, 5);
+    // Clearly the weaker layer, but not slammed onto the floor: half the
+    // luminance range apart should read as roughly half the tone.
+    expect(dotAt(map, 7, 4).t).toBeGreaterThan(0.2);
+    expect(dotAt(map, 7, 4).t).toBeLessThan(0.6);
   });
 
   test("reads the lighter layer as the stronger one in light artwork", async () => {
@@ -183,8 +186,40 @@ describe("bake", () => {
       { grid: 8 }
     );
 
+    expect(dotAt(map, 0, 4).t).toBeCloseTo(1, 5);
+    expect(dotAt(map, 7, 4).t).toBeGreaterThan(0.3);
+    expect(dotAt(map, 7, 4).t).toBeLessThan(0.75);
+  });
+
+  test("does not separate two inks of the same visual weight", async () => {
+    // A blue and a red that differ by nineteen luminance levels. Normalizing to
+    // the source's own range used to stretch that into the full tonal range,
+    // painting one half of the mark at six times the area of the other.
+    const map = await bakeImage(
+      image((x, y) => {
+        if (!inside(x, y)) {
+          return TRANSPARENT;
+        }
+        return x < SIZE / 2 ? [59, 130, 246, 255] : [239, 68, 68, 255];
+      }),
+      { grid: 8 }
+    );
+
+    const left = dotAt(map, 0, 4).t;
+    const right = dotAt(map, 7, 4).t;
+    expect(Math.abs(left - right)).toBeLessThan(0.1);
+    expect(Math.min(left, right)).toBeGreaterThan(0.9);
+  });
+
+  test("still separates artwork that is genuinely layered", async () => {
+    // Black through to near-white across the mark: real tonal range, kept.
+    const map = await bakeImage(
+      image(layer((x) => Math.round(((x - INSET) / (SIZE - INSET * 2)) * 255))),
+      { grid: 8 }
+    );
+
     expect(dotAt(map, 0, 4).t).toBeCloseTo(1, 1);
-    expect(dotAt(map, 7, 4).t).toBeCloseTo(0, 1);
+    expect(dotAt(map, 7, 4).t).toBeLessThan(0.15);
   });
 
   test("holds one flat layer at full tone", async () => {
