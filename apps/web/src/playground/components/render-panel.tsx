@@ -95,7 +95,7 @@ export function RenderPanel({
 
       <div className="flex flex-col gap-2">
         <span className="text-sm">Colour</span>
-        {/* Wraps: the panel is 300px, and nine swatches do not fit on one row. */}
+        {/* Wraps, so the row survives a swatch or two being added later. */}
         <div className="flex flex-wrap items-center gap-2">
           {DOT_COLORS.map((color) => (
             <button
