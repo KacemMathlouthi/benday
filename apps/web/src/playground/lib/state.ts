@@ -53,11 +53,3 @@ export const DEFAULT_RENDER_STATE: RenderState = {
 
 /** Merge a partial update into a state slice. */
 export type Patch<T> = (patch: Partial<T>) => void;
-
-export const COLORS = [
-  { label: "Text", value: "currentColor" },
-  { label: "Violet", value: "#8b5cf6" },
-  { label: "Amber", value: "#f59e0b" },
-  { label: "Emerald", value: "#10b981" },
-  { label: "Rose", value: "#f43f5e" },
-];

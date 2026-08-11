@@ -2,8 +2,9 @@ import type { DotShape } from "@registry/ui/benday";
 
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { DOT_COLORS } from "@/lib/colors";
 import type { ShowcaseSettings } from "@/lib/showcase";
-import { SHOWCASE_COLORS, SHOWCASE_SHAPES } from "@/lib/showcase";
+import { SHOWCASE_SHAPES } from "@/lib/showcase";
 import { cn } from "@/lib/utils";
 
 function Field({
@@ -102,7 +103,7 @@ export function ShowcaseControls({
 
         <Field label="Colour">
           <div className="flex flex-wrap items-center gap-2 py-1">
-            {SHOWCASE_COLORS.map((color) => (
+            {DOT_COLORS.map((color) => (
               <button
                 aria-label={color.label}
                 aria-pressed={settings.color === color.value}

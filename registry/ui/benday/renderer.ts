@@ -40,7 +40,7 @@ const STIFFNESS = 140;
 const DAMPING = 20;
 const MAX_TIMESTEP = 0.05;
 /** Below this, separate cells become subpixel haze rather than a dot lattice. */
-const MIN_AUTO_CELL_PX = 1.5;
+const MIN_AUTO_CELL_PX = 2;
 
 /** Options whose change invalidates the cached per-dot contexts. */
 const DERIVED_KEYS = ["dotMap", "fit", "padding", "size", "weight"] as const;
@@ -165,8 +165,21 @@ export function createRenderer(
     const availableWidth = cssWidth * (1 - padding * 2);
     const availableHeight = cssHeight * (1 - padding * 2);
     cell = Math.min(availableWidth / cols, availableHeight / rows);
-    originX = (cssWidth - cell * cols) / 2;
-    originY = (cssHeight - cell * rows) / 2;
+    // A fine lattice lands every dot on a different fraction of a device pixel,
+    // so each antialiases differently and the grid dissolves. Only small marks
+    // need it, and only if the snapped lattice still fits the canvas.
+    if (opticalFactor(Math.min(cssWidth, cssHeight)) > 0) {
+      const devicePixel = 1 / dpr;
+      const snapped = Math.max(
+        devicePixel,
+        Math.round(cell / devicePixel) * devicePixel
+      );
+      if (snapped * cols <= cssWidth && snapped * rows <= cssHeight) {
+        cell = snapped;
+      }
+    }
+    originX = snapTo((cssWidth - cell * cols) / 2, dpr);
+    originY = snapTo((cssHeight - cell * rows) / 2, dpr);
     baseRadius =
       ((cell * opts.dotScale) / 2) *
       (1 + opticalFactor(Math.min(cssWidth, cssHeight)) * 0.25);
@@ -186,13 +199,14 @@ export function createRenderer(
 
     ctx.fillStyle = ink;
     const optical = opticalFactor(Math.min(cssWidth, cssHeight));
-    if (opts.glow > 0 || optical > 0) {
+    // Only `glow` blurs. Small marks used to get a halo here for optical
+    // weight, but at 16px it came out wider than the cell and the lattice bled
+    // into haze; `optical` buys that weight through radius and alpha instead.
+    if (opts.glow > 0) {
       ctx.shadowColor = ink;
-      ctx.shadowBlur = baseRadius * (4 * opts.glow + optical * 1.1);
-      ctx.shadowOffsetY = optical * 0.2;
+      ctx.shadowBlur = baseRadius * 4 * opts.glow;
     } else {
       ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
     }
 
     const run = presetFn();
@@ -235,7 +249,6 @@ export function createRenderer(
 
     ctx.globalAlpha = 1;
     ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
   }
 
   function settleTarget(): number {
@@ -372,6 +385,11 @@ export function createRenderer(
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+/** Round a CSS-pixel position onto the backing store's pixel grid. */
+function snapTo(value: number, dpr: number): number {
+  return Math.round(value * dpr) / dpr;
 }
 
 function clamp01(value: number): number {

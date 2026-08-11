@@ -2,8 +2,8 @@
 
 import { describe, expect, test } from "bun:test";
 
-import { createRenderer } from "./renderer";
-import type { DotMap, DotShape } from "./types";
+import { createRenderer } from "../ui/benday/renderer";
+import type { DotMap, DotShape } from "../ui/benday/types";
 
 let pendingFrame: FrameRequestCallback | null = null;
 globalThis.cancelAnimationFrame = () => {
@@ -16,6 +16,7 @@ globalThis.requestAnimationFrame = (callback) => {
 
 interface Paint {
   alpha: number;
+  blur: number;
   radius: number;
   shape: DotShape;
 }
@@ -23,6 +24,7 @@ interface Paint {
 function makeCanvas() {
   const paints: Paint[] = [];
   let alpha = 1;
+  let blur = 0;
   let pathRadius = 0;
   let pathShape: DotShape = "diamond";
 
@@ -38,10 +40,10 @@ function makeCanvas() {
     clearRect: () => null,
     closePath: () => null,
     fill: () => {
-      paints.push({ alpha, radius: pathRadius, shape: pathShape });
+      paints.push({ alpha, blur, radius: pathRadius, shape: pathShape });
     },
     fillRect: (_x: number, _y: number, width: number) => {
-      paints.push({ alpha, radius: width / 2, shape: "square" });
+      paints.push({ alpha, blur, radius: width / 2, shape: "square" });
     },
     fillStyle: "",
     get globalAlpha() {
@@ -57,7 +59,12 @@ function makeCanvas() {
       pathRadius = Math.abs(y);
     },
     setTransform: () => null,
-    shadowBlur: 0,
+    get shadowBlur() {
+      return blur;
+    },
+    set shadowBlur(value: number) {
+      blur = value;
+    },
     shadowColor: "",
   };
   const canvas = {
@@ -168,7 +175,7 @@ describe("registry renderer fidelity", () => {
       size: 20,
     });
 
-    expect(paints).toHaveLength(13 * 13);
+    expect(paints).toHaveLength(10 * 10);
   });
 
   test("keeps a small animated mark legible at the quietest preset frame", () => {
@@ -195,6 +202,45 @@ describe("registry renderer fidelity", () => {
     }
 
     expect(paints.at(-1)?.alpha).toBeGreaterThanOrEqual(0.8);
+  });
+
+  test("leaves a small mark unblurred unless glow asks for it", () => {
+    // A halo wider than the cell is what turned a small mark into haze.
+    const { canvas, paints } = makeCanvas();
+    createRenderer(canvas, {
+      ...staticOptions,
+      dotMap: fullMap(24, 24),
+      size: 16,
+    });
+
+    expect(paints.length).toBeGreaterThan(0);
+    expect(paints.every((paint) => paint.blur === 0)).toBe(true);
+  });
+
+  test("still blurs when glow is asked for", () => {
+    const { canvas, paints } = makeCanvas();
+    createRenderer(canvas, {
+      ...staticOptions,
+      dotMap: fullMap(24, 24),
+      glow: 1,
+      size: 16,
+    });
+
+    expect(paints.every((paint) => paint.blur > 0)).toBe(true);
+  });
+
+  test("lays a small lattice out on whole device pixels", () => {
+    const { canvas, paints } = makeCanvas();
+    createRenderer(canvas, {
+      ...staticOptions,
+      dotMap: fullMap(24, 24),
+      size: 20,
+    });
+
+    // Consolidated to a coarser grid, and no denser than the 2px floor.
+    const cols = Math.sqrt(paints.length);
+    expect(Number.isInteger(cols)).toBe(true);
+    expect(20 / cols).toBeGreaterThanOrEqual(2);
   });
 
   test("uses the source aspect rather than the rounded grid ratio", () => {

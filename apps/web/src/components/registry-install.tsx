@@ -13,8 +13,10 @@ const MANAGERS = [
   { command: "yarn dlx shadcn@latest add", id: "yarn" },
 ];
 
+// `@benday` is in the shadcn registry directory, so the namespace resolves
+// without a components.json entry: https://github.com/shadcn-ui/ui/pull/11447
 export function RegistryInstall({
-  item = "KacemMathlouthi/benday/benday",
+  item = "@benday/benday",
 }: {
   item?: string;
 }) {

@@ -1,5 +1,6 @@
 import type { DotMap, DotShape } from "@registry/ui/benday";
 
+import { DOT_COLORS } from "@/lib/colors";
 import { cn } from "@/lib/utils";
 import {
   Panel,
@@ -10,7 +11,6 @@ import {
 import { PresetPicker } from "@/playground/components/preset-picker";
 import { round } from "@/playground/lib/snippet";
 import type { Patch, RenderState } from "@/playground/lib/state";
-import { COLORS } from "@/playground/lib/state";
 
 const SHAPES: { value: DotShape; label: string }[] = [
   { label: "Circle", value: "circle" },
@@ -95,8 +95,9 @@ export function RenderPanel({
 
       <div className="flex flex-col gap-2">
         <span className="text-sm">Colour</span>
-        <div className="flex items-center gap-2">
-          {COLORS.map((color) => (
+        {/* Wraps, so the row survives a swatch or two being added later. */}
+        <div className="flex flex-wrap items-center gap-2">
+          {DOT_COLORS.map((color) => (
             <button
               aria-label={color.label}
               aria-pressed={render.color === color.value}

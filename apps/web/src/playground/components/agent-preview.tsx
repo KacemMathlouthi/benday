@@ -7,6 +7,7 @@ import {
   ReasoningContent,
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import {
   Task,
   TaskContent,
@@ -178,6 +179,62 @@ function TaskMock({
   );
 }
 
+/** Ten ticks a second, so the timer reads like a stopwatch rather than a clock. */
+const SEARCH_TICKS = 60;
+const SEARCH_TICK_MS = 100;
+
+/**
+ * The long-running case: no steps to show and no text to stream, just the mark,
+ * a label and elapsed time. It is the shape most agent UIs actually ship, and
+ * the one where a generic spinner would otherwise sit.
+ */
+function SearchMock({
+  dotMap,
+  logo,
+}: {
+  dotMap: DotMap | null;
+  logo: LogoProps;
+}) {
+  const tick = useLoop(SEARCH_TICKS, SEARCH_TICK_MS, 2400);
+  const running = tick < SEARCH_TICKS;
+
+  return (
+    <div className="flex w-fit items-center gap-2.5 text-base">
+      <AgentMark
+        dotMap={dotMap}
+        logo={logo}
+        state={running ? "thinking" : "done"}
+      />
+
+      {/* Both labels sit in one grid cell, so the box is as wide as the longer
+          of them and the swap on the last tick cannot shove the time sideways.
+          `visibility` rather than a conditional: hidden takes it out of the
+          accessibility tree too, so only the current wording is announced. */}
+      <span className="grid">
+        <span
+          className="col-start-1 row-start-1"
+          style={{ visibility: running ? "visible" : "hidden" }}
+        >
+          <Shimmer as="span" duration={1.6}>
+            Searching the codebase
+          </Shimmer>
+        </span>
+        <span
+          className="col-start-1 row-start-1 text-muted-foreground"
+          style={{ visibility: running ? "hidden" : "visible" }}
+        >
+          Searched the codebase
+        </span>
+      </span>
+
+      {/* Tabular figures, so the digits tick in place instead of jittering. */}
+      <span className="font-mono text-muted-foreground text-sm tabular-nums">
+        {(tick / 10).toFixed(1)}s
+      </span>
+    </div>
+  );
+}
+
 /** A full-bleed band whose content is a centred, left-aligned column. */
 function Row({ children }: { children: React.ReactNode }) {
   return (
@@ -208,12 +265,7 @@ export function AgentPreview({
       </Row>
 
       <Row>
-        <div className="flex items-center gap-3 text-base text-muted-foreground">
-          <AgentMark dotMap={dotMap} logo={logo} state="thinking" />
-          <span className="min-w-0">
-            Searching the codebase for the auth middleware…
-          </span>
-        </div>
+        <SearchMock dotMap={dotMap} logo={logo} />
       </Row>
     </div>
   );

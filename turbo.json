@@ -8,6 +8,10 @@
       "inputs": ["$TURBO_DEFAULT$", "!**/*.md"],
       "outputs": ["dist/**"]
     },
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": []
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$"]

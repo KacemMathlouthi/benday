@@ -9,7 +9,7 @@
       ]
     },
     "registry": {
-      "entry": ["ui/benday.tsx", "ui/**/*.test.ts"],
+      "entry": ["ui/benday.tsx", "tests/**/*.test.ts"],
       "project": ["**/*.{ts,tsx}"]
     },
     "apps/web": {

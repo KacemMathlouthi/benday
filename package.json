@@ -18,7 +18,8 @@
   "type": "module",
   "scripts": {
     "build": "bun run registry:build && turbo run build",
-    "dev": "bun run registry:build && turbo run dev",
+    "dev": "bun run registry:build && turbo run dev --filter=web",
+    "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "registry:build": "shadcn build --output apps/web/public/r",
     "check": "ultracite check",

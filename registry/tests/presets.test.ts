@@ -2,8 +2,8 @@
 
 import { describe, expect, test } from "bun:test";
 
-import { PRESET_NAMES, PRESETS, makeFrame } from "./presets";
-import type { DotContext, DotFrame } from "./types";
+import { PRESET_NAMES, PRESETS, makeFrame } from "../ui/benday/presets";
+import type { DotContext, DotFrame } from "../ui/benday/types";
 
 const contexts: DotContext[] = [
   {

@@ -9,16 +9,18 @@ bun install
 bun run dev
 ```
 
-`dev` builds the registry and starts the docs site and playground at `localhost:5173`.
+`dev` builds the registry and starts the docs site and playground at `localhost:5173`. The launch video is its own app and stays out of the way — `bun run video:studio` opens Remotion Studio when you actually want it.
 
 ## Layout
 
 ```text
 registry/ui/benday.tsx    the primitive, and the public exports
 registry/ui/benday/       bake, renderer, presets, React binding
+registry/tests/           the suite — outside ui/, so ui/ stays a clean mirror
 registry.json             the registry source catalog
 apps/web/                 docs site and playground
 apps/web/public/r/        generated payloads — never edit by hand
+apps/launch-video/        the Remotion launch film, run on its own
 ```
 
 `registry/` mirrors the tree the shadcn CLI writes into a consumer's project. That is why the imports inside it are relative (`./benday/renderer`) rather than aliased: an alias would be meaningless once the files land somewhere else. The docs app reaches them through `@registry/*`, so the site renders the same source it distributes.
@@ -42,6 +44,7 @@ Two things to keep in mind:
 ```bash
 bun run check      # lint and format
 bun run typecheck
+bun run test       # the registry suite
 bun run knip       # unused files, exports, dependencies
 bun run build
 ```
@@ -49,6 +52,12 @@ bun run build
 CI runs all of these plus the registry drift check.
 
 `knip` treats `registry/ui/benday.tsx` as an entry point, so its exports are exempt — everything behind it is not. If you add an export that nothing uses, knip will say so, and it is usually right.
+
+## Tests
+
+`registry/tests/` covers the three things a consumer would notice breaking: that every preset writes a finite, in-range frame for any logo geometry; that the renderer turns coverage, tone and depth into the radius it promises; and that the bake separates ink, trims, reads layered artwork and normalizes depth.
+
+`bake` and the renderer both need a canvas, so the suite stubs one — a hand-authored pixel buffer handed back through a fake `getImageData`, and a context that records what was painted instead of painting it. That is why `bakeImage` pins `workingSize` to the source size: it keeps a rescale from sitting between the pixels you wrote and the mask under test. Changing the bake pipeline usually means changing those expectations, and a failure there is worth reading before assuming the test is stale.
 
 ## Adding a preset
 
