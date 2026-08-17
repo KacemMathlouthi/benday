@@ -1,5 +1,5 @@
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 
 import "./index.css";
@@ -12,7 +12,7 @@ if (!root) {
   throw new Error("web: #root is missing from index.html");
 }
 
-createRoot(root).render(
+const tree = (
   <StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey="benday-theme">
       <BrowserRouter>
@@ -21,3 +21,11 @@ createRoot(root).render(
     </ThemeProvider>
   </StrictMode>
 );
+
+// A built page arrives prerendered and is hydrated; the dev server sends an
+// empty shell, which has nothing to hydrate.
+if (root.hasChildNodes()) {
+  hydrateRoot(root, tree);
+} else {
+  createRoot(root).render(tree);
+}

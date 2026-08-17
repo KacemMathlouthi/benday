@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-ssr
 .turbo
 .next
 .DS_Store

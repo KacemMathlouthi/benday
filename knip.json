@@ -13,6 +13,7 @@
       "project": ["**/*.{ts,tsx}"]
     },
     "apps/web": {
+      "entry": ["src/entry-server.tsx"],
       "ignore": ["src/components/ui/**", "src/components/ai-elements/**"],
       "ignoreDependencies": ["ai"]
     }

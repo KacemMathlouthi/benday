@@ -14,57 +14,15 @@
     <meta name="application-name" content="benday" />
     <meta name="apple-mobile-web-app-title" content="benday" />
 
-    <title>benday — your logo, halftoned into a thinking indicator</title>
-    <meta
-      name="description"
-      content="Turn any logo into an animated dot-field thinking indicator for AI and agent UIs."
-    />
-    <link rel="canonical" href="https://benday.kacemmathlouthi.dev/" />
-
     <!--
-      Absolute URLs: crawlers do not resolve relative ones, and the card is the
-      only place this site gets to make its visual case before a click.
+      Title, description, canonical and the social card are per-URL, so the
+      prerender writes them here — one set per page, absolute, with the right
+      canonical. A single shared block would tell crawlers that /usage and
+      /playground are the homepage. Dev serves the shell as-is; the title below
+      is only ever seen there.
     -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="benday" />
-    <meta property="og:url" content="https://benday.kacemmathlouthi.dev/" />
-    <meta
-      property="og:title"
-      content="benday — your logo, halftoned into a thinking indicator"
-    />
-    <meta
-      property="og:description"
-      content="Turn any logo into an animated dot-field thinking indicator for AI and agent UIs."
-    />
-    <meta
-      property="og:image"
-      content="https://benday.kacemmathlouthi.dev/og.png"
-    />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:type" content="image/png" />
-    <meta
-      property="og:image:alt"
-      content="The benday monogram above a stippled figure standing in a field of dots"
-    />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="benday — your logo, halftoned into a thinking indicator"
-    />
-    <meta
-      name="twitter:description"
-      content="Turn any logo into an animated dot-field thinking indicator for AI and agent UIs."
-    />
-    <meta
-      name="twitter:image"
-      content="https://benday.kacemmathlouthi.dev/og.png"
-    />
-    <meta
-      name="twitter:image:alt"
-      content="The benday monogram above a stippled figure standing in a field of dots"
-    />
+    <title>benday — your logo, halftoned into a thinking indicator</title>
+    <!--seo-->
   </head>
   <body>
     <div id="root"></div>

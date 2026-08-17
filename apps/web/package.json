@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "clean": "rm -rf dist .turbo",
+    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && bun scripts/prerender.ts",
+    "clean": "rm -rf dist dist-ssr .turbo",
     "dev": "vite",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
