@@ -47,8 +47,8 @@
     "typescript": "^5.9.3",
     "ultracite": "^7.1.4"
   },
+  "overridesComment": "streamdown pulls shiki 4 while @streamdown/code pins shiki 3, and the two BundledLanguage unions do not unify. One copy keeps the ai-elements plugin config type-checking — and keeps a large dependency out of the bundle twice. This note sits outside `overrides` because npm reads every key in there as a package name and refuses to run at all on a `//` comment.",
   "overrides": {
-    "//": "streamdown pulls shiki 4 while @streamdown/code pins shiki 3, and the two BundledLanguage unions do not unify. One copy keeps the ai-elements plugin config type-checking — and keeps a large dependency out of the bundle twice.",
     "shiki": "3.23.0"
   },
   "engines": {
