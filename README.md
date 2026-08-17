@@ -49,6 +49,8 @@ apps/web/public/r/    generated payloads, committed
 
 The docs app imports `registry/` through `@registry/*` rather than keeping a copy, so every example on the site is the code that ships.
 
+The site is prerendered: `apps/web/src/lib/seo.ts` lists every page, and `bun run build` writes one HTML file per route with its own title, description, canonical and rendered markup. **A new route must be added to `PAGES` there** — there is no SPA fallback, so a route missing from that list is a 404 on a direct hit.
+
 ## Development
 
 ```bash
