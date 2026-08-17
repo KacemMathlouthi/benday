@@ -4,12 +4,8 @@
   "installCommand": "bun install --frozen-lockfile",
   "outputDirectory": "apps/web/dist",
   "framework": null,
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/assets/(.*)",

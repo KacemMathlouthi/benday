@@ -1,11 +1,26 @@
-import { Outlet, Route, Routes } from "react-router";
+import { useEffect } from "react";
+import { Outlet, Route, Routes, useLocation } from "react-router";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { applyHead } from "@/lib/head";
+import { metaForPath } from "@/lib/seo";
 import { Home } from "@/routes/home";
 import { NotFound } from "@/routes/not-found";
 import { Playground } from "@/routes/playground";
 import { Usage } from "@/routes/usage";
+
+/**
+ * Every URL is served its own prerendered head, so this is only for client-side
+ * navigation — without it the title and canonical would stay on whichever page
+ * the visitor happened to land on.
+ */
+function useRouteHead() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    applyHead(metaForPath(pathname));
+  }, [pathname]);
+}
 
 /** Header and footer belong to the site, not to every route: 404 opts out. */
 function SiteLayout() {
@@ -21,6 +36,8 @@ function SiteLayout() {
 }
 
 export function App() {
+  useRouteHead();
+
   return (
     <Routes>
       <Route element={<SiteLayout />}>
