@@ -13,7 +13,7 @@ const REPO = "https://github.com/KacemMathlouthi/benday";
 /** The icon rail: the project first, then the person who maintains it. */
 const socialLinks = [
   { Icon: GithubIcon, href: REPO, label: "benday on GitHub" },
-  { Icon: XIcon, href: "https://x.com/KacemMathl44045", label: "Kacem on X" },
+  { Icon: XIcon, href: "https://x.com/KacemMathlouthi", label: "Kacem on X" },
   {
     Icon: Globe,
     href: "https://kacemmathlouthi.dev",
