@@ -1,5 +1,11 @@
 import type { PageMeta } from "@/lib/seo";
-import { OG_IMAGE, OG_IMAGE_ALT, SITE_NAME, canonicalFor } from "@/lib/seo";
+import {
+  OG_IMAGE,
+  OG_IMAGE_ALT,
+  SITE_NAME,
+  SITE_URL,
+  canonicalFor,
+} from "@/lib/seo";
 
 /**
  * The per-page head, described once. The prerender serializes these into the
@@ -9,7 +15,7 @@ import { OG_IMAGE, OG_IMAGE_ALT, SITE_NAME, canonicalFor } from "@/lib/seo";
 export type HeadTag =
   | { kind: "title"; content: string }
   | { kind: "meta"; attr: "name" | "property"; key: string; content: string }
-  | { kind: "link"; rel: string; href: string };
+  | { kind: "link"; rel: string; href: string; type?: string };
 
 export function headTags(page: PageMeta): HeadTag[] {
   const url = canonicalFor(page);
@@ -22,6 +28,15 @@ export function headTags(page: PageMeta): HeadTag[] {
       kind: "meta",
     },
     { href: url, kind: "link", rel: "canonical" },
+    // The same page as markdown, for agents that would rather not parse the
+    // HTML. Content negotiation serves it at this URL too; the link is how a
+    // client that does not negotiate finds it.
+    {
+      href: `${SITE_URL}/${page.file}.md`,
+      kind: "link",
+      rel: "alternate",
+      type: "text/markdown",
+    },
 
     { attr: "property", content: "website", key: "og:type", kind: "meta" },
     {
@@ -122,6 +137,9 @@ export function applyHead(page: PageMeta): void {
       }
       if (tag.kind === "link") {
         element.setAttribute("rel", tag.rel);
+        if (tag.type) {
+          element.setAttribute("type", tag.type);
+        }
       }
       document.head.append(element);
     }

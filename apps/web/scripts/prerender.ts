@@ -69,7 +69,8 @@ function serializeTag(tag: HeadTag): string {
     return `<title>${escape(tag.content)}</title>`;
   }
   if (tag.kind === "link") {
-    return `<link rel="${tag.rel}" href="${escape(tag.href)}" />`;
+    const type = tag.type ? ` type="${tag.type}"` : "";
+    return `<link rel="${tag.rel}"${type} href="${escape(tag.href)}" />`;
   }
   return `<meta ${tag.attr}="${tag.key}" content="${escape(tag.content)}" />`;
 }
