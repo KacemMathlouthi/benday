@@ -51,7 +51,9 @@ The renderer also consolidates an over-dense lattice when a cell would fall belo
 
 `bun run build` in `apps/web` runs `vite build`, then an SSR build of `src/entry-server.tsx`, then `scripts/prerender.ts`, which writes one real HTML file per route plus `sitemap.xml`.
 
-`src/lib/seo.ts` lists every page. **A new route must be added to `PAGES` there** — there is no SPA fallback rewrite any more, so a route missing from that list is a genuine 404 on a direct hit. `src/lib/head.ts` describes the head once and is used twice: serialized into the static HTML at build time, and applied in place on client navigation.
+`src/lib/seo.ts` lists every page. **A new route must be added to `PAGES` there, and needs a matching `apps/web/content/<file>.md`.** There is no SPA fallback rewrite any more, so a route missing from `PAGES` is a genuine 404 on a direct hit, and a missing content file fails the prerender. `src/lib/head.ts` describes the head once and is used twice: serialized into the static HTML at build time, and applied in place on client navigation.
+
+Every page is also served as markdown. `apps/web/content/*.md` holds the prose; the prerender substitutes `{{presets}}` and `{{props}}` from `PRESETS` and `src/lib/api.ts`, writes `dist/<file>.md`, and generates `llms.txt`. Vercel rewrites the page URL to its `.md` twin on `Accept: text/markdown`. That rewrite names the routes explicitly, so a new page belongs in `vercel.json` and its mirror too.
 
 The authoritative deploy config is the root `vercel.json` (`apps/web/vercel.json` is a mirror and is not what Vercel reads).
 
