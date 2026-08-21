@@ -20,11 +20,9 @@ import { Benday } from "@/components/ui/benday";
 
 ## How it works
 
-The image is rasterized once and its ink separated from its background: by alpha when the source has soft edges, otherwise by a luminance mask read off the corners. A second pass preserves the artwork's own tonal layers. A Euclidean distance transform gives every pixel its depth inside the shape, and the result is grid-sampled into a **dot map**: a few hundred dots carrying position, ink coverage, tone and depth.
+The image is rasterized once and its ink separated from its background, by alpha or by a luminance mask. A Euclidean distance transform gives every pixel its depth inside the shape, and the result is grid-sampled into a **dot map**: a few hundred dots carrying position, ink coverage, tone and depth.
 
-That dot map is all the renderer animates. It is small and JSON-serializable on purpose: bake it at build time, pass `dotMap` instead of `src`, and the client does none of the above.
-
-The renderer resolves `currentColor` against the canvas and re-resolves it on a theme change, stops painting off-screen or in a hidden tab, honours `prefers-reduced-motion`, and trades motion for optical weight below 32 pixels so a favicon-sized mark stays legible.
+That dot map is all the renderer animates. It resolves `currentColor` against the canvas, stops painting off-screen, and honours `prefers-reduced-motion`. Bake at build time, pass `dotMap` instead of `src`, and the client skips the rest.
 
 ## Presets
 
