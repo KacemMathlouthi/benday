@@ -10,6 +10,7 @@ import { Contact } from "@/routes/contact";
 import { Home } from "@/routes/home";
 import { NotFound } from "@/routes/not-found";
 import { Playground } from "@/routes/playground";
+import { Privacy } from "@/routes/privacy";
 import { Usage } from "@/routes/usage";
 
 /**
@@ -48,6 +49,7 @@ export function App() {
         <Route element={<Playground />} path="/playground" />
         <Route element={<About />} path="/about" />
         <Route element={<Contact />} path="/contact" />
+        <Route element={<Privacy />} path="/privacy" />
       </Route>
       <Route element={<NotFound />} path="*" />
     </Routes>

@@ -63,6 +63,14 @@ export const PAGES: PageMeta[] = [
     title: "Contact: issues, pull requests and the maintainer | benday",
   },
   {
+    description:
+      "What benday.kacemmathlouthi.dev stores and sends. No analytics, no cookies, no accounts: the logo you drop into the playground never leaves your browser.",
+    file: "privacy",
+    indexable: true,
+    path: "/privacy",
+    title: "Privacy: what this site does not collect | benday",
+  },
+  {
     description: "That page does not exist.",
     file: "404",
     indexable: false,
