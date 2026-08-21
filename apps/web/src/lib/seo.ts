@@ -47,6 +47,14 @@ export const PAGES: PageMeta[] = [
     title: "Playground — drop your logo in | benday",
   },
   {
+    description:
+      "What benday is, who maintains it, and how it is licensed and released. An open-code shadcn registry component, MIT, with no package to depend on.",
+    file: "about",
+    indexable: true,
+    path: "/about",
+    title: "About the project and its maintainer | benday",
+  },
+  {
     description: "That page does not exist.",
     file: "404",
     indexable: false,

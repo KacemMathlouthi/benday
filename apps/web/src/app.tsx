@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { applyHead } from "@/lib/head";
 import { metaForPath } from "@/lib/seo";
+import { About } from "@/routes/about";
 import { Home } from "@/routes/home";
 import { NotFound } from "@/routes/not-found";
 import { Playground } from "@/routes/playground";
@@ -44,6 +45,7 @@ export function App() {
         <Route element={<Home />} index />
         <Route element={<Usage />} path="/usage" />
         <Route element={<Playground />} path="/playground" />
+        <Route element={<About />} path="/about" />
       </Route>
       <Route element={<NotFound />} path="*" />
     </Routes>
