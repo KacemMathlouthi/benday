@@ -5,7 +5,7 @@ import { Container } from "@/components/container";
 import { GithubIcon } from "@/components/icons/github-icon";
 import { XIcon } from "@/components/icons/x-icon";
 import { Logo } from "@/components/logo";
-import { NAV_LINKS } from "@/components/nav-links";
+import { FOOTER_LINKS, NAV_LINKS } from "@/components/nav-links";
 import { Button } from "@/components/ui/button";
 import {
   MAINTAINER,
@@ -58,7 +58,7 @@ export function Footer() {
 
           <nav>
             <ul className="flex flex-wrap gap-4 font-medium text-muted-foreground text-sm md:gap-6">
-              {NAV_LINKS.map((link) => (
+              {[...NAV_LINKS, ...FOOTER_LINKS].map((link) => (
                 <li key={link.to}>
                   <Link className="hover:text-foreground" to={link.to}>
                     {link.label}
