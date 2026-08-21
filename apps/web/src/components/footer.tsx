@@ -5,18 +5,23 @@ import { Container } from "@/components/container";
 import { GithubIcon } from "@/components/icons/github-icon";
 import { XIcon } from "@/components/icons/x-icon";
 import { Logo } from "@/components/logo";
-import { NAV_LINKS } from "@/components/nav-links";
+import { FOOTER_LINKS, NAV_LINKS } from "@/components/nav-links";
 import { Button } from "@/components/ui/button";
-
-const REPO = "https://github.com/KacemMathlouthi/benday";
+import {
+  MAINTAINER,
+  MAINTAINER_GITHUB,
+  MAINTAINER_SITE,
+  MAINTAINER_X,
+  REPO,
+} from "@/lib/links";
 
 /** The icon rail: the project first, then the person who maintains it. */
 const socialLinks = [
   { Icon: GithubIcon, href: REPO, label: "benday on GitHub" },
-  { Icon: XIcon, href: "https://x.com/KacemMathlouthi", label: "Kacem on X" },
+  { Icon: XIcon, href: MAINTAINER_X, label: "Kacem on X" },
   {
     Icon: Globe,
-    href: "https://kacemmathlouthi.dev",
+    href: MAINTAINER_SITE,
     label: "Kacem's portfolio",
   },
 ];
@@ -53,7 +58,7 @@ export function Footer() {
 
           <nav>
             <ul className="flex flex-wrap gap-4 font-medium text-muted-foreground text-sm md:gap-6">
-              {NAV_LINKS.map((link) => (
+              {[...NAV_LINKS, ...FOOTER_LINKS].map((link) => (
                 <li key={link.to}>
                   <Link className="hover:text-foreground" to={link.to}>
                     {link.label}
@@ -71,12 +76,12 @@ export function Footer() {
             <span>Built by</span>
             <a
               className="inline-flex items-center gap-1 text-foreground/80 hover:text-foreground hover:underline"
-              href="https://github.com/KacemMathlouthi"
+              href={MAINTAINER_GITHUB}
               rel="noreferrer"
               target="_blank"
             >
               <img
-                alt="Kacem Mathlouthi"
+                alt={MAINTAINER}
                 className="size-4 rounded-full"
                 height="16"
                 src="https://github.com/KacemMathlouthi.png"

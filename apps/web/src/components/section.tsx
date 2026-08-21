@@ -63,6 +63,20 @@ export function Section({
   );
 }
 
+/**
+ * Body copy for the pages that are only prose. It runs the full column, like
+ * the lists on the usage page: a narrower measure inside this container reads
+ * as a half-width block sitting in empty space. Links are styled here rather
+ * than at each call site, since the text pages are dense with them.
+ */
+export function Prose({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-4 text-muted-foreground leading-relaxed [&_a:hover]:text-foreground/80 [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4">
+      {children}
+    </div>
+  );
+}
+
 /** A subordinate note tied to the evidence directly above it. */
 export function Note({ children }: { children: React.ReactNode }) {
   return (

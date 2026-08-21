@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 
+# Agent index, and every page as markdown:
+# https://benday.kacemmathlouthi.dev/llms.txt
+
 Sitemap: https://benday.kacemmathlouthi.dev/sitemap.xml

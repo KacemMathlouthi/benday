@@ -5,7 +5,7 @@ import { Link } from "react-router";
 
 import { Container } from "@/components/container";
 import { PresetCard } from "@/components/preset-card";
-import { Section } from "@/components/section";
+import { Prose, Section } from "@/components/section";
 import { ShowcaseControls } from "@/components/showcase-controls";
 import { Button } from "@/components/ui/button";
 import type { ShowcaseSettings } from "@/lib/showcase";
@@ -74,7 +74,6 @@ export function Home() {
             {PRESET_NAMES.length} ways to animate one mark
           </span>
         }
-        className="pb-4"
         title="Presets"
       >
         <ShowcaseControls onChange={patch} settings={settings} />
@@ -84,6 +83,29 @@ export function Home() {
             <PresetCard key={preset} preset={preset} settings={settings} />
           ))}
         </div>
+      </Section>
+
+      <Section
+        className="pb-4"
+        lead="Three steps, run once."
+        title="How it works"
+      >
+        <Prose>
+          <p>
+            The logo is rasterized once and its ink separated from its
+            background, by alpha or by a luminance mask. A distance transform
+            gives every pixel its depth inside the shape, and the result is
+            sampled onto a grid: a few hundred dots carrying position, coverage,
+            tone and depth.
+          </p>
+          <p>
+            That dot map is all the renderer animates. It resolves{" "}
+            <code>currentColor</code> against the canvas, stops painting
+            off-screen, and honours reduced motion. Bake at build time, pass{" "}
+            <code>dotMap</code> instead of <code>src</code>, and the client
+            skips the rest.
+          </p>
+        </Prose>
       </Section>
     </Container>
   );

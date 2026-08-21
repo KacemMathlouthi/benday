@@ -5,9 +5,12 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { applyHead } from "@/lib/head";
 import { metaForPath } from "@/lib/seo";
+import { About } from "@/routes/about";
+import { Contact } from "@/routes/contact";
 import { Home } from "@/routes/home";
 import { NotFound } from "@/routes/not-found";
 import { Playground } from "@/routes/playground";
+import { Privacy } from "@/routes/privacy";
 import { Usage } from "@/routes/usage";
 
 /**
@@ -44,6 +47,9 @@ export function App() {
         <Route element={<Home />} index />
         <Route element={<Usage />} path="/usage" />
         <Route element={<Playground />} path="/playground" />
+        <Route element={<About />} path="/about" />
+        <Route element={<Contact />} path="/contact" />
+        <Route element={<Privacy />} path="/privacy" />
       </Route>
       <Route element={<NotFound />} path="*" />
     </Routes>
