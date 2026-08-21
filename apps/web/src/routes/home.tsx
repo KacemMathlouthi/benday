@@ -69,6 +69,24 @@ export function Home() {
       </section>
 
       <Section
+        actions={
+          <span className="text-muted-foreground text-sm">
+            {PRESET_NAMES.length} ways to animate one mark
+          </span>
+        }
+        title="Presets"
+      >
+        <ShowcaseControls onChange={patch} settings={settings} />
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {PRESET_NAMES.map((preset) => (
+            <PresetCard key={preset} preset={preset} settings={settings} />
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        className="pb-4"
         lead="Three steps, run once. Everything after that is arithmetic on a few hundred dots."
         title="How it works"
       >
@@ -96,24 +114,6 @@ export function Home() {
             instead of <code>src</code> to skip the first two steps entirely.
           </p>
         </Prose>
-      </Section>
-
-      <Section
-        actions={
-          <span className="text-muted-foreground text-sm">
-            {PRESET_NAMES.length} ways to animate one mark
-          </span>
-        }
-        className="pb-4"
-        title="Presets"
-      >
-        <ShowcaseControls onChange={patch} settings={settings} />
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {PRESET_NAMES.map((preset) => (
-            <PresetCard key={preset} preset={preset} settings={settings} />
-          ))}
-        </div>
       </Section>
     </Container>
   );
