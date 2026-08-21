@@ -4,48 +4,80 @@
   "installCommand": "bun install --frozen-lockfile",
   "outputDirectory": "apps/web/dist",
   "framework": null,
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/",
+      "src": "^/assets/(.*)$",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" },
+      "continue": true
+    },
+
+    { "src": "^/index\\.html$", "status": 308, "headers": { "Location": "/" } },
+    {
+      "src": "^/(.+)\\.html$",
+      "status": 308,
+      "headers": { "Location": "/$1" }
+    },
+    { "src": "^/(.+)/$", "status": 308, "headers": { "Location": "/$1" } },
+
+    {
+      "src": "^/(.*\\.md)$",
+      "headers": { "vary": "Accept, Accept-Encoding" },
+      "continue": true
+    },
+
+    {
+      "src": "^/$",
       "has": [
         { "type": "header", "key": "accept", "value": ".*text/markdown.*" }
       ],
-      "destination": "/index.md"
+      "dest": "/index.md",
+      "headers": {
+        "content-type": "text/markdown; charset=utf-8",
+        "vary": "Accept, Accept-Encoding"
+      }
     },
     {
-      "source": "/:page(usage|playground|about|contact|privacy)",
+      "src": "^/(usage|playground|about|contact|privacy)$",
       "has": [
         { "type": "header", "key": "accept", "value": ".*text/markdown.*" }
       ],
-      "destination": "/:page.md"
-    }
-  ],
-  "headers": [
+      "dest": "/$1.md",
+      "headers": {
+        "content-type": "text/markdown; charset=utf-8",
+        "vary": "Accept, Accept-Encoding"
+      }
+    },
+
     {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
+      "src": "^/$",
+      "dest": "/index.html",
+      "headers": { "vary": "Accept, Accept-Encoding" }
     },
     {
-      "source": "/",
-      "headers": [{ "key": "Vary", "value": "Accept, Accept-Encoding" }]
+      "src": "^/(usage|playground|about|contact|privacy)$",
+      "dest": "/$1.html",
+      "headers": { "vary": "Accept, Accept-Encoding" }
+    },
+
+    { "handle": "filesystem" },
+
+    {
+      "src": "^/.*$",
+      "has": [
+        { "type": "header", "key": "accept", "value": ".*text/markdown.*" }
+      ],
+      "status": 404,
+      "dest": "/404.md",
+      "headers": {
+        "content-type": "text/markdown; charset=utf-8",
+        "vary": "Accept, Accept-Encoding"
+      }
     },
     {
-      "source": "/:page(usage|playground|about|contact|privacy)",
-      "headers": [{ "key": "Vary", "value": "Accept, Accept-Encoding" }]
-    },
-    {
-      "source": "/(.*).md",
-      "headers": [
-        { "key": "Content-Type", "value": "text/markdown; charset=utf-8" },
-        { "key": "Vary", "value": "Accept, Accept-Encoding" }
-      ]
+      "src": "^/.*$",
+      "status": 404,
+      "dest": "/404.html",
+      "headers": { "vary": "Accept, Accept-Encoding" }
     }
   ]
 }
