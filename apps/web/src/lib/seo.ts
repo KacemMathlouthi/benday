@@ -55,6 +55,14 @@ export const PAGES: PageMeta[] = [
     title: "About the project and its maintainer | benday",
   },
   {
+    description:
+      "How to reach the benday project: GitHub issues for bugs and preset ideas, pull requests for code, and the maintainer's own channels for anything else.",
+    file: "contact",
+    indexable: true,
+    path: "/contact",
+    title: "Contact: issues, pull requests and the maintainer | benday",
+  },
+  {
     description: "That page does not exist.",
     file: "404",
     indexable: false,
