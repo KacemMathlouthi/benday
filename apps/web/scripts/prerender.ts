@@ -76,27 +76,70 @@ function serializeTag(tag: HeadTag): string {
 }
 
 /**
- * Structured data, on the homepage only — it describes the site and the
- * project, not the individual page, and repeating it per URL says nothing new.
+ * Structured data, on the homepage only. It describes the site and the project,
+ * not the individual page, and repeating it per URL says nothing new.
+ * SoftwareApplication is what a machine reads to answer "what is this, what
+ * does it cost, who made it"; SoftwareSourceCode answers "where is the code".
  */
 function structuredData(): string {
+  const author = {
+    "@id": `${SITE_URL}/#maintainer`,
+    "@type": "Person",
+    jobTitle: "Software engineer",
+    name: "Kacem Mathlouthi",
+    sameAs: [
+      "https://github.com/KacemMathlouthi",
+      "https://x.com/KacemMathlouthi",
+    ],
+    url: "https://kacemmathlouthi.dev",
+  };
+
+  const description =
+    "An open-code React component that rasterizes a logo into a Ben-Day dot field and animates it as a thinking indicator for AI and agent interfaces.";
+
   const graph = [
     {
+      "@id": `${SITE_URL}/#website`,
       "@type": "WebSite",
-      description:
-        "Turn any logo into an animated dot-field thinking indicator for AI and agent UIs.",
+      description,
+      inLanguage: "en",
       name: "benday",
+      publisher: { "@id": author["@id"] },
+      url: `${SITE_URL}/`,
+    },
+    author,
+    {
+      "@id": `${SITE_URL}/#software`,
+      "@type": "SoftwareApplication",
+      applicationCategory: "DeveloperApplication",
+      author: { "@id": author["@id"] },
+      description,
+      featureList: PRESET_NAMES.map(
+        (name) => `${PRESETS[name]?.label ?? name} animation preset`
+      ),
+      isAccessibleForFree: true,
+      license: "https://opensource.org/licenses/MIT",
+      name: "benday",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      operatingSystem: "Any",
+      programmingLanguage: "TypeScript",
+      softwareRequirements: "React 18 or later",
       url: `${SITE_URL}/`,
     },
     {
+      "@id": `${SITE_URL}/#source`,
       "@type": "SoftwareSourceCode",
-      author: { "@type": "Person", name: "Kacem Mathlouthi" },
+      author: { "@id": author["@id"] },
       codeRepository: "https://github.com/KacemMathlouthi/benday",
-      description:
-        "An open-code React component that rasterizes a logo into a Ben-Day dot field and animates it as a thinking indicator.",
+      description,
       license: "https://opensource.org/licenses/MIT",
       name: "benday",
       programmingLanguage: "TypeScript",
+      targetProduct: { "@id": `${SITE_URL}/#software` },
       url: `${SITE_URL}/`,
     },
   ];
