@@ -87,31 +87,23 @@ export function Home() {
 
       <Section
         className="pb-4"
-        lead="Three steps, run once. Everything after that is arithmetic on a few hundred dots."
+        lead="Three steps, run once."
         title="How it works"
       >
         <Prose>
           <p>
-            The logo is rasterized a single time, and its ink separated from its
-            background: by alpha when the source has soft edges, otherwise by a
-            luminance mask read off the corners. A second pass keeps the
-            artwork&rsquo;s own tonal layers, so a mark built from two shades
-            stays built from two shades.
+            The logo is rasterized once and its ink separated from its
+            background, by alpha or by a luminance mask. A distance transform
+            gives every pixel its depth inside the shape, and the result is
+            sampled onto a grid: a few hundred dots carrying position, coverage,
+            tone and depth.
           </p>
           <p>
-            A Euclidean distance transform then measures how deep inside the
-            shape every pixel sits, and the result is sampled onto a grid. What
-            comes out is a dot map: a few hundred dots carrying position, ink
-            coverage, tone and depth. It is small, JSON-serializable, and the
-            only thing the renderer reads.
-          </p>
-          <p>
-            From there the renderer paints. It resolves{" "}
+            That dot map is all the renderer animates. It resolves{" "}
             <code>currentColor</code> against the canvas, stops painting
-            off-screen or in a hidden tab, honours reduced motion, and trades
-            motion for optical weight below 32 pixels so a favicon-sized mark
-            stays legible. Bake at build time and pass <code>dotMap</code>{" "}
-            instead of <code>src</code> to skip the first two steps entirely.
+            off-screen, and honours reduced motion. Bake at build time, pass{" "}
+            <code>dotMap</code> instead of <code>src</code>, and the client
+            skips the rest.
           </p>
         </Prose>
       </Section>
