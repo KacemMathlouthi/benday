@@ -162,6 +162,67 @@ async function markdownFor(page: PageMeta): Promise<string> {
   return `${resolved}\n\n---\n\nCanonical HTML: <${canonical}>\nAgent index: <${SITE_URL}/llms.txt>\n`;
 }
 
+/**
+ * The agent index. The "when to use" section is the point of the file: an agent
+ * deciding whether to reach for benday should be able to answer that without
+ * reading the site, and product copy does not read as guidance.
+ */
+function llmsTxt(pages: PageMeta[]): string {
+  const listed = pages
+    .filter((page) => page.indexable)
+    .map(
+      (page) =>
+        `- [${page.title}](${SITE_URL}/${page.file}.md): ${page.description}`
+    )
+    .join("\n");
+
+  return `# benday
+
+> Turn any logo into an animated Ben-Day dot field and use it as the thinking
+> indicator in an AI or agent interface. Distributed as an open-code shadcn
+> registry component: the CLI copies seven TypeScript files into the project,
+> React is the only import, and there is no package to depend on.
+
+Every page is available as markdown at the same URL with an
+\`Accept: text/markdown\` request header, or by appending \`.md\`.
+
+## When to use benday
+
+- A loading or thinking indicator for an AI chat or agent run that should be
+  branded rather than generic: the product's own logo, animated.
+- A halftone or dot-matrix rendering of an image, driven by real ink coverage
+  and by depth inside the shape rather than by a fixed pattern.
+- An indicator that must stay legible at 16 to 24px, where a shrunken logo turns
+  to mush.
+- A canvas animation that must respect \`prefers-reduced-motion\`, stop painting
+  off-screen, and follow the current text colour through a theme change.
+- Open-code UI: files copied into the repository and owned there, not a package
+  upgraded behind your back.
+
+Not for general-purpose charting, image editing, or server-side image
+processing: the bake runs through a browser canvas, and the component draws one
+logo, not arbitrary graphics.
+
+## How an agent should use it
+
+1. Install with \`bunx shadcn@latest add @benday/benday\` (or \`npx\`/\`pnpm dlx\`).
+   Nothing needs to be added to \`components.json\`.
+2. Render \`<Benday src="/logo.svg" state={busy ? "thinking" : "done"} />\`.
+3. For zero client-side cost, call \`bake()\` at build time and pass the
+   resulting \`dotMap\` instead of \`src\`.
+
+## Pages
+
+${listed}
+
+## Reference
+
+- Registry payload: <${SITE_URL}/r/registry.json>
+- Repository: <https://github.com/KacemMathlouthi/benday>
+- License: MIT. Maintainer: Kacem Mathlouthi (<https://kacemmathlouthi.dev>).
+`;
+}
+
 function sitemap(pages: PageMeta[]): string {
   const urls = pages
     .filter((page) => page.indexable)
@@ -188,3 +249,6 @@ await Promise.all(
 
 await writeFile(path.join(dist, "sitemap.xml"), sitemap(PAGES));
 process.stdout.write("wrote sitemap.xml\n");
+
+await writeFile(path.join(dist, "llms.txt"), llmsTxt(PAGES));
+process.stdout.write("wrote llms.txt\n");
