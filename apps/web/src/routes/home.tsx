@@ -5,7 +5,7 @@ import { Link } from "react-router";
 
 import { Container } from "@/components/container";
 import { PresetCard } from "@/components/preset-card";
-import { Section } from "@/components/section";
+import { Prose, Section } from "@/components/section";
 import { ShowcaseControls } from "@/components/showcase-controls";
 import { Button } from "@/components/ui/button";
 import type { ShowcaseSettings } from "@/lib/showcase";
@@ -67,6 +67,36 @@ export function Home() {
           </Button>
         </div>
       </section>
+
+      <Section
+        lead="Three steps, run once. Everything after that is arithmetic on a few hundred dots."
+        title="How it works"
+      >
+        <Prose>
+          <p>
+            The logo is rasterized a single time, and its ink separated from its
+            background: by alpha when the source has soft edges, otherwise by a
+            luminance mask read off the corners. A second pass keeps the
+            artwork&rsquo;s own tonal layers, so a mark built from two shades
+            stays built from two shades.
+          </p>
+          <p>
+            A Euclidean distance transform then measures how deep inside the
+            shape every pixel sits, and the result is sampled onto a grid. What
+            comes out is a dot map: a few hundred dots carrying position, ink
+            coverage, tone and depth. It is small, JSON-serializable, and the
+            only thing the renderer reads.
+          </p>
+          <p>
+            From there the renderer paints. It resolves{" "}
+            <code>currentColor</code> against the canvas, stops painting
+            off-screen or in a hidden tab, honours reduced motion, and trades
+            motion for optical weight below 32 pixels so a favicon-sized mark
+            stays legible. Bake at build time and pass <code>dotMap</code>{" "}
+            instead of <code>src</code> to skip the first two steps entirely.
+          </p>
+        </Prose>
+      </Section>
 
       <Section
         actions={
