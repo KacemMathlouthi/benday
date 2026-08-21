@@ -17,6 +17,20 @@ import type { PageMeta } from "../src/lib/seo";
 
 const webRoot = path.join(import.meta.dirname, "..");
 const dist = path.join(webRoot, "dist");
+const content = path.join(webRoot, "content");
+
+interface PresetDefinition {
+  label: string;
+  description: string;
+  family: string;
+}
+
+interface PropRow {
+  name: string;
+  type: string;
+  def: string;
+  note: string;
+}
 
 interface ServerEntry {
   render: (url: string) => string;
@@ -24,12 +38,24 @@ interface ServerEntry {
   canonicalFor: (page: PageMeta) => string;
   PAGES: PageMeta[];
   SITE_URL: string;
+  PRESETS: Record<string, PresetDefinition>;
+  PRESET_NAMES: string[];
+  PROPS: PropRow[];
 }
 
 const entry: ServerEntry = await import(
   path.join(webRoot, "dist-ssr", "entry-server.js")
 );
-const { PAGES, SITE_URL, canonicalFor, headTags, render } = entry;
+const {
+  PAGES,
+  PRESETS,
+  PRESET_NAMES,
+  PROPS,
+  SITE_URL,
+  canonicalFor,
+  headTags,
+  render,
+} = entry;
 
 const escape = (value: string) =>
   value
@@ -93,6 +119,49 @@ function buildPage(template: string, page: PageMeta, appHtml: string): string {
   );
 }
 
+/** The preset catalogue, straight from the map the renderer reads. */
+function presetList(): string {
+  return PRESET_NAMES.map((name) => {
+    const preset = PRESETS[name];
+    if (!preset) {
+      return `- \`${name}\``;
+    }
+    return `- \`${name}\`, **${preset.label}** (${preset.family}): ${preset.description}`;
+  }).join("\n");
+}
+
+/** A union type carries a pipe, which would otherwise end the table cell early. */
+const cell = (value: string) => value.replaceAll("|", "\\|");
+
+/** The prop table, straight from the rows the usage page renders. */
+function propTable(): string {
+  const rows = PROPS.map((prop) => {
+    const def = prop.def === "None" ? "none" : `\`${cell(prop.def)}\``;
+    return `| \`${prop.name}\` | \`${cell(prop.type)}\` | ${def} | ${cell(prop.note)} |`;
+  });
+  return [
+    "| Prop | Type | Default | Notes |",
+    "| --- | --- | --- | --- |",
+    ...rows,
+  ].join("\n");
+}
+
+/**
+ * The markdown twin of a page. Agents that ask for `text/markdown` are served
+ * this at the page's own URL. The generated blocks come from the same source
+ * the HTML renders, so only the prose is written twice.
+ */
+async function markdownFor(page: PageMeta): Promise<string> {
+  const body = await readFile(path.join(content, `${page.file}.md`), "utf-8");
+  const canonical = canonicalFor(page);
+  const resolved = body
+    .replace("{{presets}}", presetList())
+    .replace("{{props}}", propTable())
+    .trimEnd();
+
+  return `${resolved}\n\n---\n\nCanonical HTML: <${canonical}>\nAgent index: <${SITE_URL}/llms.txt>\n`;
+}
+
 function sitemap(pages: PageMeta[]): string {
   const urls = pages
     .filter((page) => page.indexable)
@@ -109,7 +178,11 @@ await Promise.all(
     const url = page.path === "*" ? "/__not-found__" : page.path;
     const html = buildPage(template, page, render(url));
     await writeFile(path.join(dist, `${page.file}.html`), html);
-    process.stdout.write(`prerendered ${page.file}.html\n`);
+    await writeFile(
+      path.join(dist, `${page.file}.md`),
+      await markdownFor(page)
+    );
+    process.stdout.write(`prerendered ${page.file}.html + .md\n`);
   })
 );
 

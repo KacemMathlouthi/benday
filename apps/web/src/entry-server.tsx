@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 // Re-exported so the prerender script consumes one bundled module and never has
 // to resolve the app's path aliases itself.
+export { PRESETS, PRESET_NAMES } from "@registry/ui/benday";
+export { PROPS } from "@/lib/api";
 export { headTags } from "@/lib/head";
 export type { PageMeta } from "@/lib/seo";
 export { PAGES, SITE_URL, canonicalFor } from "@/lib/seo";
