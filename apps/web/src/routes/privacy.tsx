@@ -21,10 +21,10 @@ export function Privacy() {
       <Section title="What this site collects">
         <Prose>
           <p>
-            Nothing. There is no analytics script, no tag manager, no session
-            recording, no advertising pixel and no cookie set by this site. No
-            page asks for a name, an email address or a payment method, because
-            there is nothing here to sign up for or buy.
+            Nothing. No analytics script, no tag manager, no session recording,
+            no advertising pixel, no cookie. No page asks for a name, an email
+            address or a payment method, because there is nothing here to sign
+            up for or buy.
           </p>
         </Prose>
       </Section>
@@ -33,11 +33,10 @@ export function Privacy() {
         <Prose>
           <p>
             The <Link to="/playground">playground</Link> runs entirely in your
-            browser. A logo you drop in is read locally, drawn to a canvas and
-            turned into a dot map by JavaScript already on the page. It is never
-            uploaded and never persisted: reload the tab and it is gone. The
-            agent preview beside it streams hard-coded text, so no model is
-            called.
+            browser: a logo you drop in is read locally and turned into a dot
+            map by JavaScript already on the page. It is never uploaded and
+            never persisted, so reloading the tab loses it. The agent preview
+            beside it streams hard-coded text, so no model is called.
           </p>
         </Prose>
       </Section>
@@ -45,10 +44,10 @@ export function Privacy() {
       <Section title="What is stored in your browser">
         <Prose>
           <p>
-            One <code>localStorage</code> entry, under the key{" "}
-            <code>benday-theme</code>, remembering whether you chose the light
-            theme, the dark theme, or to follow your system. It stays on your
-            device and is never transmitted. Clearing site data removes it.
+            One <code>localStorage</code> entry, <code>benday-theme</code>,
+            remembering whether you chose the light theme, the dark theme, or to
+            follow your system. It never leaves your device, and clearing site
+            data removes it.
           </p>
         </Prose>
       </Section>
@@ -58,9 +57,7 @@ export function Privacy() {
           <p>
             Fonts, images and scripts are served from this domain, with one
             exception: the footer shows the maintainer&rsquo;s avatar, loaded
-            from <code>github.com</code>, so GitHub sees that request. The other
-            links in the footer are ordinary links, followed only if you click
-            them.
+            from <code>github.com</code>, so GitHub sees that request.
           </p>
           <p>
             The site is hosted on <Out href="https://vercel.com">Vercel</Out>,
@@ -69,8 +66,8 @@ export function Privacy() {
             <Out href="https://vercel.com/legal/privacy-policy">
               its own privacy policy
             </Out>
-            . {MAINTAINER} does not query or retain those logs. If this ever
-            changes, this page will say so first. Anything unclear is worth{" "}
+            . {MAINTAINER} does not query or retain those logs. If that ever
+            changes, this page will say so first; anything unclear is worth{" "}
             <Out href={ISSUES}>raising as an issue</Out>.
           </p>
         </Prose>

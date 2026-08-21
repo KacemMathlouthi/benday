@@ -31,16 +31,15 @@ export function About() {
       <Section title="What it is">
         <Prose>
           <p>
-            benday rasterizes a logo once, separates ink from background, and
-            samples it into a grid of dots. The renderer animates that grid
+            benday samples a logo into a grid of dots and animates that grid
             while an agent works, then settles it back into the crisp mark.
             There are {PRESET_NAMES.length} presets, and a preset is a plain
-            function of one dot and the clock, so a project can write its own.
+            function of one dot and the clock, so you can write your own.
           </p>
           <p>
-            It exists because every AI interface needs somewhere to say it is
-            thinking, and a spinner says it in a voice that belongs to no one. A
-            product already has a mark. This turns that mark into the wait.
+            It exists because a spinner says &ldquo;thinking&rdquo; in a voice
+            that belongs to no one. A product already has a mark. This turns
+            that mark into the wait.
           </p>
         </Prose>
       </Section>
@@ -51,10 +50,10 @@ export function About() {
             There is no package to depend on. Installing runs the{" "}
             <Out href="https://ui.shadcn.com/docs/cli">shadcn CLI</Out>, which
             copies seven TypeScript files into your project, where they are
-            yours to edit. React is the only import in any of them.{" "}
+            yours to edit. React is the only import.{" "}
             <Link to="/usage">Usage</Link> has the install command and the
-            props; the <Link to="/playground">playground</Link> runs the whole
-            pipeline in the browser on a logo you drop in.
+            props; the <Link to="/playground">playground</Link> runs the
+            pipeline on a logo you drop in.
           </p>
         </Prose>
       </Section>
@@ -64,11 +63,11 @@ export function About() {
           <p>
             benday is written and maintained by {MAINTAINER} (
             <Out href={MAINTAINER_GITHUB}>@KacemMathlouthi</Out>), a software
-            engineer working on AI products. More of his work is at{" "}
+            engineer working on AI products, whose other work is at{" "}
             <Out href={MAINTAINER_SITE}>kacemmathlouthi.dev</Out>. Development
             happens in the open on <Out href={REPO}>GitHub</Out>, and{" "}
             <Out href={CONTRIBUTING}>CONTRIBUTING.md</Out> describes the
-            workflow for issues and pull requests.
+            workflow.
           </p>
         </Prose>
       </Section>
@@ -78,10 +77,10 @@ export function About() {
           <p>
             benday is released under the <Out href={LICENSE}>MIT license</Out>.
             Because the component is copied rather than installed, upgrading is
-            deliberate: re-run the CLI when you want a newer version, then diff
-            it against your own edits. Every user-facing change is recorded in
-            the <Out href={CHANGELOG}>changelog</Out>. Questions and preset
-            ideas belong on <Link to="/contact">the contact page</Link>.
+            deliberate: re-run the CLI, then diff against your own edits. Every
+            user-facing change is recorded in the{" "}
+            <Out href={CHANGELOG}>changelog</Out>. Questions and preset ideas
+            belong on <Link to="/contact">the contact page</Link>.
           </p>
         </Prose>
       </Section>

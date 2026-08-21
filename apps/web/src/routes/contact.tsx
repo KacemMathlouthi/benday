@@ -34,8 +34,7 @@ export function Contact() {
             badly, a preset that misbehaves at small sizes, a prop that does not
             do what the documentation says. Include the logo, or the JSX the{" "}
             <Link to="/playground">playground</Link> generated for it. The bake
-            is determined entirely by the source image and the options, so that
-            is enough to reproduce it.
+            depends on nothing else, so that is enough to reproduce it.
           </p>
         </Prose>
       </Section>
@@ -43,11 +42,10 @@ export function Contact() {
       <Section title="Code">
         <Prose>
           <p>
-            Pull requests go to <Out href={REPO}>the repository</Out>, and{" "}
+            Pull requests go to <Out href={REPO}>the repository</Out>;{" "}
             <Out href={CONTRIBUTING}>CONTRIBUTING.md</Out> covers the setup, the
-            changeset a user-facing change needs, and the checks CI runs. Open
-            questions that are not yet a bug fit best in{" "}
-            <Out href={DISCUSSIONS}>discussions</Out>.
+            changeset, and the checks CI runs. Open questions that are not yet a
+            bug fit best in <Out href={DISCUSSIONS}>discussions</Out>.
           </p>
         </Prose>
       </Section>
@@ -55,15 +53,14 @@ export function Contact() {
       <Section title="The maintainer">
         <Prose>
           <p>
-            benday is built by {MAINTAINER}. For anything that is not about the
-            project itself, he is reachable at{" "}
+            benday is built by {MAINTAINER}, reachable at{" "}
             <Out href={MAINTAINER_X}>@KacemMathlouthi on X</Out>, on{" "}
             <Out href={MAINTAINER_GITHUB}>GitHub</Out>, and through his site at{" "}
             <Out href={MAINTAINER_SITE}>kacemmathlouthi.dev</Out>. There is no
             support contract and no mailing list: issues are answered in the
-            open, where the next person with the same question can find the
-            answer. More about the project is on{" "}
-            <Link to="/about">the about page</Link>.
+            open, where the next person with the same question finds the answer.
+            More about the project is on <Link to="/about">the about page</Link>
+            .
           </p>
         </Prose>
       </Section>
