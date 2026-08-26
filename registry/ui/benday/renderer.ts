@@ -459,7 +459,11 @@ function buildDisplayMap(
     const top = (clamp(dot.row, 0, sourceRows) * rows) / sourceRows;
     const bottom = (clamp(dot.row + 1, 0, sourceRows) * rows) / sourceRows;
 
-    for (let row = Math.floor(top); row < Math.min(rows, Math.ceil(bottom)); row++) {
+    for (
+      let row = Math.floor(top);
+      row < Math.min(rows, Math.ceil(bottom));
+      row++
+    ) {
       const overlapY = Math.min(bottom, row + 1) - Math.max(top, row);
       if (overlapY <= 0) {
         continue;

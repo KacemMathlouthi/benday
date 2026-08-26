@@ -18,6 +18,8 @@ import type {
 } from "../../../../registry/ui/benday";
 import { clamp01 } from "./math";
 
+/** Dot diameter, in cells, whose area fills the cell. */
+const FULL_COVERAGE_DIAMETER = 2 / Math.sqrt(Math.PI);
 const DotMapContext = createContext<DotMap | null>(null);
 
 export function BendayAssets({ children }: { children: React.ReactNode }) {
@@ -93,7 +95,7 @@ interface FrameBendayProps {
 export function FrameBenday({
   className,
   color = "#ededed",
-  dotScale = 0.62,
+  dotScale = 1,
   frameOffset = 0,
   opacity = 1,
   preset = "contour",
@@ -102,7 +104,7 @@ export function FrameBenday({
   speed = 1,
   settle = 0,
   style,
-  weight = 0.5,
+  weight = 1,
 }: FrameBendayProps) {
   const dotMap = useContext(DotMapContext);
   const frame = useCurrentFrame();
@@ -118,7 +120,7 @@ export function FrameBenday({
   const originX = (size - cell * dotMap.cols) / 2;
   const originY = (size - cell * dotMap.rows) / 2;
   const optical = opticalFactor(size);
-  const baseRadius = ((cell * dotScale) / 2) * (1 + opticalFactor(size) * 0.25);
+  const baseRadius = (cell * FULL_COVERAGE_DIAMETER * dotScale) / 2;
   const clock = ((frame + frameOffset) / fps) * speed;
   const run = PRESETS[preset].fn;
   const resolvedSettle = clamp01(settle);
@@ -153,7 +155,7 @@ export function FrameBenday({
         const radius =
           baseRadius *
           scale *
-          toneScale(dot.v, dot.t, dot.d, weight, optical) *
+          toneScale(dot.v, dot.t, weight) *
           shapeScale(shape);
         const x = originX + (dot.x * dotMap.cols + animated.dx * motion) * cell;
         const y = originY + (dot.y * dotMap.rows + animated.dy * motion) * cell;
@@ -236,22 +238,11 @@ function dotRandom(index: number) {
   return value - Math.floor(value);
 }
 
-function toneScale(
-  coverage: number,
-  sourceTone: number,
-  distance: number,
-  weight: number,
-  optical: number
-) {
-  const weightedCoverage =
-    1 - clamp01(weight) + clamp01(weight) * clamp01(coverage);
-  const depth = clamp01(distance);
-  const smoothDepth = depth * depth * (3 - 2 * depth);
-  const depthTone = 0.72 + smoothDepth * 0.38;
-  const layerFloor = 0.18 + optical * 0.14;
-  const layerTone = layerFloor + clamp01(sourceTone) * (1 - layerFloor);
-  const tone = weightedCoverage * layerTone * (0.82 + depthTone * 0.18);
-  return Math.sqrt(clamp01(tone));
+/** Mirrors the registry renderer: painted area is the cell's own tone. */
+function toneScale(coverage: number, sourceTone: number, weight: number) {
+  const w = clamp01(weight);
+  const weighted = 1 - w + w * clamp01(coverage);
+  return Math.sqrt(clamp01(weighted * clamp01(sourceTone)));
 }
 
 function opticalFactor(size: number) {
