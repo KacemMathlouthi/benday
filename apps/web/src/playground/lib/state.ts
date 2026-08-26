@@ -40,7 +40,7 @@ export const DEFAULT_BAKE_STATE: BakeState = {
 
 export const DEFAULT_RENDER_STATE: RenderState = {
   color: "currentColor",
-  dotScale: 0.62,
+  dotScale: 1,
   fitNatural: false,
   glow: 0,
   padding: 0.06,
@@ -48,7 +48,7 @@ export const DEFAULT_RENDER_STATE: RenderState = {
   shape: "circle",
   size: 256,
   speed: 1,
-  weight: 0.5,
+  weight: 1,
 };
 
 /** Merge a partial update into a state slice. */

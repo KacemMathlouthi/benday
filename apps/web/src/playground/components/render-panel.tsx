@@ -50,7 +50,7 @@ export function RenderPanel({
       />
       <Slider
         format={round}
-        hint="Dot diameter as a fraction of the cell."
+        hint="Dot size against a full-coverage halftone dot; 1 paints solid ink solid."
         label="Dot scale"
         max={1.3}
         min={0.15}
