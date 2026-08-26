@@ -446,44 +446,57 @@ function buildDisplayMap(
     ink: 0,
     tone: 0,
   }));
+  // Split each source cell across the target cells it overlaps, by area. Giving
+  // it whole to one bin doubles the ink in every nth bin, which is worst at the
+  // near-1 ratios small marks land on — the lattice grew a beat of its own.
   for (const dot of map.dots) {
-    const sourceCol = clamp(Math.floor(dot.col), 0, sourceCols - 1);
-    const sourceRow = clamp(Math.floor(dot.row), 0, sourceRows - 1);
-    const col = Math.min(cols - 1, Math.floor((sourceCol * cols) / sourceCols));
-    const row = Math.min(rows - 1, Math.floor((sourceRow * rows) / sourceRows));
-    const bin = bins[row * cols + col];
-    if (!bin) {
+    const coverage = clamp01(dot.v);
+    if (coverage <= 0) {
       continue;
     }
-    const coverage = clamp01(dot.v);
-    bin.ink += coverage;
-    bin.depth += clamp01(dot.d) * coverage;
-    bin.tone += clamp01(dot.t) * coverage;
+    const left = (clamp(dot.col, 0, sourceCols) * cols) / sourceCols;
+    const right = (clamp(dot.col + 1, 0, sourceCols) * cols) / sourceCols;
+    const top = (clamp(dot.row, 0, sourceRows) * rows) / sourceRows;
+    const bottom = (clamp(dot.row + 1, 0, sourceRows) * rows) / sourceRows;
+
+    for (let row = Math.floor(top); row < Math.min(rows, Math.ceil(bottom)); row++) {
+      const overlapY = Math.min(bottom, row + 1) - Math.max(top, row);
+      if (overlapY <= 0) {
+        continue;
+      }
+      for (
+        let col = Math.floor(left);
+        col < Math.min(cols, Math.ceil(right));
+        col++
+      ) {
+        const overlapX = Math.min(right, col + 1) - Math.max(left, col);
+        if (overlapX <= 0) {
+          continue;
+        }
+        const bin = bins[row * cols + col];
+        if (!bin) {
+          continue;
+        }
+        // Weights over a full target cell sum to 1, so ink is already its mean.
+        const ink = coverage * overlapX * overlapY;
+        bin.ink += ink;
+        bin.depth += clamp01(dot.d) * ink;
+        bin.tone += clamp01(dot.t) * ink;
+      }
+    }
   }
 
   const dots: DisplayDot[] = [];
   for (let row = 0; row < rows; row++) {
-    const sourceRowStart = Math.ceil((row * sourceRows) / rows);
-    const sourceRowEnd = Math.ceil(((row + 1) * sourceRows) / rows);
     for (let col = 0; col < cols; col++) {
       const bin = bins[row * cols + col];
-      if (!bin || bin.ink <= 0) {
-        continue;
-      }
-      const sourceColStart = Math.ceil((col * sourceCols) / cols);
-      const sourceColEnd = Math.ceil(((col + 1) * sourceCols) / cols);
-      const sourceCells = Math.max(
-        1,
-        (sourceColEnd - sourceColStart) * (sourceRowEnd - sourceRowStart)
-      );
-      const coverage = clamp01(bin.ink / sourceCells);
-      if (coverage <= 0.004) {
+      if (!bin || bin.ink <= 0.004) {
         continue;
       }
       dots.push({
         d: bin.depth / bin.ink,
         t: bin.tone / bin.ink,
-        v: coverage,
+        v: clamp01(bin.ink),
         x: (col + 0.5) / cols,
         y: (row + 0.5) / rows,
       });

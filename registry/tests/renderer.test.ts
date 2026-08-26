@@ -182,6 +182,24 @@ describe("registry renderer fidelity", () => {
     expect(paints).toHaveLength(20 * 20);
   });
 
+  test("splits a source cell across the target cells it straddles", () => {
+    const { canvas, paints } = makeCanvas();
+
+    // A hard edge at source column 12 of 25 lands at 10.56 on a 22-cell
+    // lattice. Handing each source cell whole to one bin snaps that edge to a
+    // boundary; splitting it by area keeps the half-covered cell.
+    const map = fullMap(25, 25);
+    map.dots = map.dots.filter((dot) => dot.col < 12);
+
+    createRenderer(canvas, { ...staticOptions, dotMap: map, size: 22 });
+
+    const max = Math.max(...paints.map((paint) => paint.radius));
+    const partial = paints.filter(
+      (paint) => paint.radius > max * 0.2 && paint.radius < max * 0.95
+    );
+    expect(partial.length).toBeGreaterThan(0);
+  });
+
   test("keeps a small animated mark legible at the quietest preset frame", () => {
     const { canvas, paints } = makeCanvas();
 
