@@ -21,7 +21,7 @@ import type {
 export const DEFAULT_RENDERER_OPTIONS: ResolvedRendererOptions = {
   color: "currentColor",
   dotMap: null,
-  dotScale: 1,
+  dotScale: 0.62,
   fit: "square",
   glow: 0,
   padding: 0.06,
@@ -32,7 +32,7 @@ export const DEFAULT_RENDERER_OPTIONS: ResolvedRendererOptions = {
   size: 64,
   speed: 1,
   state: "thinking",
-  weight: 1,
+  weight: 0.5,
 };
 
 /** Light spring for the thinking ↔ crisp transition. Slightly under-damped. */

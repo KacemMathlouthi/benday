@@ -95,7 +95,7 @@ interface FrameBendayProps {
 export function FrameBenday({
   className,
   color = "#ededed",
-  dotScale = 1,
+  dotScale = 0.62,
   frameOffset = 0,
   opacity = 1,
   preset = "contour",
@@ -104,7 +104,7 @@ export function FrameBenday({
   speed = 1,
   settle = 0,
   style,
-  weight = 1,
+  weight = 0.5,
 }: FrameBendayProps) {
   const dotMap = useContext(DotMapContext);
   const frame = useCurrentFrame();

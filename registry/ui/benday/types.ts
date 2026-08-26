@@ -147,7 +147,7 @@ export interface RendererOptions {
   speed?: number;
   /** Dot color. `currentColor` resolves against the canvas. @default 'currentColor' */
   color?: string;
-  /** Dot size against a full-coverage halftone dot; 1 lets solid ink paint solid. @default 1 */
+  /** Dot size against a full-coverage halftone dot; 1 lets solid ink paint solid. @default 0.62 */
   dotScale?: number;
   /** @default 'circle' */
   shape?: DotShape;
@@ -155,7 +155,7 @@ export interface RendererOptions {
   glow?: number;
   /** Inset around the mark as a fraction of the box. @default 0.06 */
   padding?: number;
-  /** How strongly ink coverage drives each dot's painted area, 0..1. @default 1 */
+  /** How strongly ink coverage drives each dot's painted area, 0..1. @default 0.5 */
   weight?: number;
   /** Freeze on the current frame. @default false */
   paused?: boolean;
