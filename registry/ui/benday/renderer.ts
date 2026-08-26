@@ -39,8 +39,8 @@ export const DEFAULT_RENDERER_OPTIONS: ResolvedRendererOptions = {
 const STIFFNESS = 140;
 const DAMPING = 20;
 const MAX_TIMESTEP = 0.05;
-/** Below this, separate cells become subpixel haze rather than a dot lattice. */
-const MIN_AUTO_CELL_PX = 2;
+/** Below this the lattice is subpixel haze. In device pixels: that is where dots resolve. */
+const MIN_AUTO_CELL_DEVICE_PX = 2;
 
 /** Dot diameter, in cells, whose area fills the cell — what full ink must reach to paint solid. */
 const FULL_COVERAGE_DIAMETER = 2 / Math.sqrt(Math.PI);
@@ -429,11 +429,12 @@ function buildDisplayMap(
     (width * (1 - padding * 2)) / sourceCols,
     (height * (1 - padding * 2)) / sourceRows
   );
-  if (!Number.isFinite(cell) || cell >= MIN_AUTO_CELL_PX) {
+  const minCell = MIN_AUTO_CELL_DEVICE_PX / devicePixelRatioCapped();
+  if (!Number.isFinite(cell) || cell >= minCell) {
     return source;
   }
 
-  const scale = cell / MIN_AUTO_CELL_PX;
+  const scale = cell / minCell;
   const cols = Math.max(1, Math.floor(sourceCols * scale));
   const rows = Math.max(1, Math.floor(sourceRows * scale));
   if (cols === sourceCols && rows === sourceRows) {

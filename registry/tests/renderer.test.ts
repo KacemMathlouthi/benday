@@ -2,6 +2,7 @@
 
 import { describe, expect, test } from "bun:test";
 
+import { devicePixelRatioCapped } from "../ui/benday/dom";
 import { createRenderer } from "../ui/benday/renderer";
 import type { DotMap, DotShape } from "../ui/benday/types";
 
@@ -168,16 +169,17 @@ describe("registry renderer fidelity", () => {
     expect(paints[1]?.radius).toBeCloseTo(paints[0]?.radius ?? 0, 6);
   });
 
-  test("consolidates an over-dense map at small CSS sizes", () => {
+  test("consolidates an over-dense map at small sizes", () => {
     const { canvas, paints } = makeCanvas();
 
     createRenderer(canvas, {
       ...staticOptions,
-      dotMap: fullMap(24, 24),
+      dotMap: fullMap(40, 40),
       size: 20,
     });
 
-    expect(paints).toHaveLength(10 * 10);
+    // 40 cells over 20px is finer than the backing store resolves; 20 is not.
+    expect(paints).toHaveLength(20 * 20);
   });
 
   test("keeps a small animated mark legible at the quietest preset frame", () => {
@@ -239,10 +241,10 @@ describe("registry renderer fidelity", () => {
       size: 20,
     });
 
-    // Consolidated to a coarser grid, and no denser than the 2px floor.
+    // Consolidated to a coarser grid, and no denser than the 2 device px floor.
     const cols = Math.sqrt(paints.length);
     expect(Number.isInteger(cols)).toBe(true);
-    expect(20 / cols).toBeGreaterThanOrEqual(2);
+    expect((20 / cols) * devicePixelRatioCapped()).toBeGreaterThanOrEqual(2);
   });
 
   test("uses the source aspect rather than the rounded grid ratio", () => {
