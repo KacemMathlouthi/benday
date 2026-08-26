@@ -121,7 +121,8 @@ export function PresetPicker({
             </span>
           </div>
 
-          <div className="themed-scrollbar min-h-0 max-w-full flex-1 overflow-x-hidden overflow-y-auto p-1.5 sm:max-h-[min(34rem,70vh)] sm:p-2">
+          {/* No padding above: a sticky heading offset from the top leaks rows under it. */}
+          <div className="themed-scrollbar min-h-0 max-w-full flex-1 overflow-x-hidden overflow-y-auto px-1.5 pb-1.5 sm:max-h-[min(34rem,70vh)] sm:px-2 sm:pb-2">
             {groups.length === 0 ? (
               <p className="px-3 py-10 text-center text-muted-foreground text-sm">
                 No presets found.
