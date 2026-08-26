@@ -58,9 +58,9 @@ export const PROPS: PropRow[] = [
     type: "string",
   },
   {
-    def: "0.62",
+    def: "1",
     name: "dotScale",
-    note: "Dot diameter as a fraction of the grid cell",
+    note: "Dot size against a full-coverage halftone dot",
     type: "number",
   },
   {
@@ -82,7 +82,7 @@ export const PROPS: PropRow[] = [
     type: "number",
   },
   {
-    def: "0.5",
+    def: "1",
     name: "weight",
     note: "How strongly ink coverage drives dot size",
     type: "number",

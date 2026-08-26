@@ -110,10 +110,12 @@ const staticOptions = {
 };
 
 describe("registry renderer fidelity", () => {
-  test("represents coverage through area without fading the dot twice", () => {
+  // The halftone contract: painted area is the cell's own tone, so a dot of
+  // coverage v covers v of its cell. A ceiling below 1 is what painted black grey.
+  test.each([0.25, 0.5, 1])("paints area equal to coverage %p", (v) => {
     const { canvas, paints } = makeCanvas();
     const map = fullMap(1, 1);
-    map.dots[0] = { ...map.dots[0], d: 1, v: 0.25 };
+    map.dots[0] = { ...map.dots[0], d: 1, v };
 
     createRenderer(canvas, {
       ...staticOptions,
@@ -124,14 +126,15 @@ describe("registry renderer fidelity", () => {
     });
 
     expect(paints).toHaveLength(1);
-    expect(paints[0]?.radius).toBeCloseTo(25, 0);
+    const area = Math.PI * (paints[0]?.radius ?? 0) ** 2;
+    expect(area / 100 ** 2).toBeCloseTo(v, 2);
     expect(paints[0]?.alpha).toBe(1);
   });
 
-  test("keeps opaque source layers visibly distinct", () => {
+  test("scales painted area by the source layer's tone", () => {
     const { canvas, paints } = makeCanvas();
     const map = fullMap(2, 1);
-    map.dots[0] = { ...map.dots[0], t: 0 };
+    map.dots[0] = { ...map.dots[0], t: 0.25 };
     map.dots[1] = { ...map.dots[1], t: 1 };
 
     createRenderer(canvas, {
@@ -143,12 +146,11 @@ describe("registry renderer fidelity", () => {
     });
 
     expect(paints).toHaveLength(2);
-    expect(paints[1]?.radius ?? 0).toBeGreaterThan(
-      (paints[0]?.radius ?? 0) * 2
-    );
+    const ratio = (paints[0]?.radius ?? 0) ** 2 / (paints[1]?.radius ?? 1) ** 2;
+    expect(ratio).toBeCloseTo(0.25, 2);
   });
 
-  test("uses distance from the outline to create restrained tonal depth", () => {
+  test("leaves static area to the artwork's tones, not to depth", () => {
     const { canvas, paints } = makeCanvas();
     const map = fullMap(2, 1);
     map.dots[0] = { ...map.dots[0], d: 0, v: 0.5 };
@@ -163,7 +165,7 @@ describe("registry renderer fidelity", () => {
     });
 
     expect(paints).toHaveLength(2);
-    expect(paints[1]?.radius).toBeGreaterThan(paints[0]?.radius ?? 0);
+    expect(paints[1]?.radius).toBeCloseTo(paints[0]?.radius ?? 0, 6);
   });
 
   test("consolidates an over-dense map at small CSS sizes", () => {

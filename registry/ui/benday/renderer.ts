@@ -21,7 +21,7 @@ import type {
 export const DEFAULT_RENDERER_OPTIONS: ResolvedRendererOptions = {
   color: "currentColor",
   dotMap: null,
-  dotScale: 0.62,
+  dotScale: 1,
   fit: "square",
   glow: 0,
   padding: 0.06,
@@ -32,7 +32,7 @@ export const DEFAULT_RENDERER_OPTIONS: ResolvedRendererOptions = {
   size: 64,
   speed: 1,
   state: "thinking",
-  weight: 0.5,
+  weight: 1,
 };
 
 /** Light spring for the thinking ↔ crisp transition. Slightly under-damped. */
@@ -41,6 +41,9 @@ const DAMPING = 20;
 const MAX_TIMESTEP = 0.05;
 /** Below this, separate cells become subpixel haze rather than a dot lattice. */
 const MIN_AUTO_CELL_PX = 2;
+
+/** Dot diameter, in cells, whose area fills the cell — what full ink must reach to paint solid. */
+const FULL_COVERAGE_DIAMETER = 2 / Math.sqrt(Math.PI);
 
 /** Options whose change invalidates the cached per-dot contexts. */
 const DERIVED_KEYS = ["dotMap", "fit", "padding", "size", "weight"] as const;
@@ -136,13 +139,8 @@ export function createRenderer(
         y: dot.y,
       };
     });
-    const opticalSize =
-      opts.fit === "natural"
-        ? Math.min(opts.size, opts.size / safeAspect(map))
-        : opts.size;
-    const optical = opticalFactor(opticalSize);
     toneScales = display.dots.map((dot) =>
-      toneScale(dot.v, dot.t, dot.d, opts.weight, optical)
+      toneScale(dot.v, dot.t, opts.weight)
     );
   }
 
@@ -180,9 +178,7 @@ export function createRenderer(
     }
     originX = snapTo((cssWidth - cell * cols) / 2, dpr);
     originY = snapTo((cssHeight - cell * rows) / 2, dpr);
-    baseRadius =
-      ((cell * opts.dotScale) / 2) *
-      (1 + opticalFactor(Math.min(cssWidth, cssHeight)) * 0.25);
+    baseRadius = (cell * FULL_COVERAGE_DIAMETER * opts.dotScale) / 2;
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -500,23 +496,21 @@ function buildDisplayMap(
  * A halftone represents coverage through area: radius therefore follows the
  * square root of tone. Opacity remains available to the animation instead of
  * applying coverage twice (radius, then alpha), which used to erase fine ink.
+ *
+ * Tone is what the cell covers times how dark it is. The floors this used to
+ * multiply in compounded: empty cells painted 0.169 and full ones 0.319, so
+ * every logo arrived the same flat grey. Depth stays out — it is the animation
+ * channel, and folding it in only pulls area off the artwork's own tones.
  */
 function toneScale(
   coverage: number,
   sourceTone: number,
-  distance: number,
-  weight: number,
-  optical: number
+  weight: number
 ): number {
-  const weightedCoverage =
-    1 - clamp01(weight) + clamp01(weight) * clamp01(coverage);
-  const d = clamp01(distance);
-  const smoothDepth = d * d * (3 - 2 * d);
-  const depthTone = 0.72 + smoothDepth * 0.38;
-  const layerFloor = 0.18 + optical * 0.14;
-  const layerTone = layerFloor + clamp01(sourceTone) * (1 - layerFloor);
-  const tone = weightedCoverage * layerTone * (0.82 + depthTone * 0.18);
-  return Math.sqrt(clamp01(tone));
+  const w = clamp01(weight);
+  // Below 1, weight interpolates toward a uniform field rather than shifting a floor.
+  const weighted = 1 - w + w * clamp01(coverage);
+  return Math.sqrt(clamp01(weighted * clamp01(sourceTone)));
 }
 
 /** Small marks need optical weight and restrained motion to remain identifiable. */
