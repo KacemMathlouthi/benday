@@ -60,7 +60,7 @@ export const PROPS: PropRow[] = [
   {
     def: "0.62",
     name: "dotScale",
-    note: "Dot diameter as a fraction of the grid cell",
+    note: "Dot size against a full-coverage halftone dot",
     type: "number",
   },
   {

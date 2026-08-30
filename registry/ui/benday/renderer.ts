@@ -39,8 +39,11 @@ export const DEFAULT_RENDERER_OPTIONS: ResolvedRendererOptions = {
 const STIFFNESS = 140;
 const DAMPING = 20;
 const MAX_TIMESTEP = 0.05;
-/** Below this, separate cells become subpixel haze rather than a dot lattice. */
-const MIN_AUTO_CELL_PX = 2;
+/** Below this the lattice is subpixel haze. In device pixels: that is where dots resolve. */
+const MIN_AUTO_CELL_DEVICE_PX = 2;
+
+/** Dot diameter, in cells, whose area fills the cell — what full ink must reach to paint solid. */
+const FULL_COVERAGE_DIAMETER = 2 / Math.sqrt(Math.PI);
 
 /** Options whose change invalidates the cached per-dot contexts. */
 const DERIVED_KEYS = ["dotMap", "fit", "padding", "size", "weight"] as const;
@@ -136,13 +139,8 @@ export function createRenderer(
         y: dot.y,
       };
     });
-    const opticalSize =
-      opts.fit === "natural"
-        ? Math.min(opts.size, opts.size / safeAspect(map))
-        : opts.size;
-    const optical = opticalFactor(opticalSize);
     toneScales = display.dots.map((dot) =>
-      toneScale(dot.v, dot.t, dot.d, opts.weight, optical)
+      toneScale(dot.v, dot.t, opts.weight)
     );
   }
 
@@ -180,9 +178,7 @@ export function createRenderer(
     }
     originX = snapTo((cssWidth - cell * cols) / 2, dpr);
     originY = snapTo((cssHeight - cell * rows) / 2, dpr);
-    baseRadius =
-      ((cell * opts.dotScale) / 2) *
-      (1 + opticalFactor(Math.min(cssWidth, cssHeight)) * 0.25);
+    baseRadius = (cell * FULL_COVERAGE_DIAMETER * opts.dotScale) / 2;
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -433,11 +429,12 @@ function buildDisplayMap(
     (width * (1 - padding * 2)) / sourceCols,
     (height * (1 - padding * 2)) / sourceRows
   );
-  if (!Number.isFinite(cell) || cell >= MIN_AUTO_CELL_PX) {
+  const minCell = MIN_AUTO_CELL_DEVICE_PX / devicePixelRatioCapped();
+  if (!Number.isFinite(cell) || cell >= minCell) {
     return source;
   }
 
-  const scale = cell / MIN_AUTO_CELL_PX;
+  const scale = cell / minCell;
   const cols = Math.max(1, Math.floor(sourceCols * scale));
   const rows = Math.max(1, Math.floor(sourceRows * scale));
   if (cols === sourceCols && rows === sourceRows) {
@@ -449,44 +446,61 @@ function buildDisplayMap(
     ink: 0,
     tone: 0,
   }));
+  // Split each source cell across the target cells it overlaps, by area. Giving
+  // it whole to one bin doubles the ink in every nth bin, which is worst at the
+  // near-1 ratios small marks land on — the lattice grew a beat of its own.
   for (const dot of map.dots) {
-    const sourceCol = clamp(Math.floor(dot.col), 0, sourceCols - 1);
-    const sourceRow = clamp(Math.floor(dot.row), 0, sourceRows - 1);
-    const col = Math.min(cols - 1, Math.floor((sourceCol * cols) / sourceCols));
-    const row = Math.min(rows - 1, Math.floor((sourceRow * rows) / sourceRows));
-    const bin = bins[row * cols + col];
-    if (!bin) {
+    const coverage = clamp01(dot.v);
+    if (coverage <= 0) {
       continue;
     }
-    const coverage = clamp01(dot.v);
-    bin.ink += coverage;
-    bin.depth += clamp01(dot.d) * coverage;
-    bin.tone += clamp01(dot.t) * coverage;
+    const left = (clamp(dot.col, 0, sourceCols) * cols) / sourceCols;
+    const right = (clamp(dot.col + 1, 0, sourceCols) * cols) / sourceCols;
+    const top = (clamp(dot.row, 0, sourceRows) * rows) / sourceRows;
+    const bottom = (clamp(dot.row + 1, 0, sourceRows) * rows) / sourceRows;
+
+    for (
+      let row = Math.floor(top);
+      row < Math.min(rows, Math.ceil(bottom));
+      row++
+    ) {
+      const overlapY = Math.min(bottom, row + 1) - Math.max(top, row);
+      if (overlapY <= 0) {
+        continue;
+      }
+      for (
+        let col = Math.floor(left);
+        col < Math.min(cols, Math.ceil(right));
+        col++
+      ) {
+        const overlapX = Math.min(right, col + 1) - Math.max(left, col);
+        if (overlapX <= 0) {
+          continue;
+        }
+        const bin = bins[row * cols + col];
+        if (!bin) {
+          continue;
+        }
+        // Weights over a full target cell sum to 1, so ink is already its mean.
+        const ink = coverage * overlapX * overlapY;
+        bin.ink += ink;
+        bin.depth += clamp01(dot.d) * ink;
+        bin.tone += clamp01(dot.t) * ink;
+      }
+    }
   }
 
   const dots: DisplayDot[] = [];
   for (let row = 0; row < rows; row++) {
-    const sourceRowStart = Math.ceil((row * sourceRows) / rows);
-    const sourceRowEnd = Math.ceil(((row + 1) * sourceRows) / rows);
     for (let col = 0; col < cols; col++) {
       const bin = bins[row * cols + col];
-      if (!bin || bin.ink <= 0) {
-        continue;
-      }
-      const sourceColStart = Math.ceil((col * sourceCols) / cols);
-      const sourceColEnd = Math.ceil(((col + 1) * sourceCols) / cols);
-      const sourceCells = Math.max(
-        1,
-        (sourceColEnd - sourceColStart) * (sourceRowEnd - sourceRowStart)
-      );
-      const coverage = clamp01(bin.ink / sourceCells);
-      if (coverage <= 0.004) {
+      if (!bin || bin.ink <= 0.004) {
         continue;
       }
       dots.push({
         d: bin.depth / bin.ink,
         t: bin.tone / bin.ink,
-        v: coverage,
+        v: clamp01(bin.ink),
         x: (col + 0.5) / cols,
         y: (row + 0.5) / rows,
       });
@@ -500,23 +514,21 @@ function buildDisplayMap(
  * A halftone represents coverage through area: radius therefore follows the
  * square root of tone. Opacity remains available to the animation instead of
  * applying coverage twice (radius, then alpha), which used to erase fine ink.
+ *
+ * Tone is what the cell covers times how dark it is. The floors this used to
+ * multiply in compounded: empty cells painted 0.169 and full ones 0.319, so
+ * every logo arrived the same flat grey. Depth stays out — it is the animation
+ * channel, and folding it in only pulls area off the artwork's own tones.
  */
 function toneScale(
   coverage: number,
   sourceTone: number,
-  distance: number,
-  weight: number,
-  optical: number
+  weight: number
 ): number {
-  const weightedCoverage =
-    1 - clamp01(weight) + clamp01(weight) * clamp01(coverage);
-  const d = clamp01(distance);
-  const smoothDepth = d * d * (3 - 2 * d);
-  const depthTone = 0.72 + smoothDepth * 0.38;
-  const layerFloor = 0.18 + optical * 0.14;
-  const layerTone = layerFloor + clamp01(sourceTone) * (1 - layerFloor);
-  const tone = weightedCoverage * layerTone * (0.82 + depthTone * 0.18);
-  return Math.sqrt(clamp01(tone));
+  const w = clamp01(weight);
+  // Below 1, weight interpolates toward a uniform field rather than shifting a floor.
+  const weighted = 1 - w + w * clamp01(coverage);
+  return Math.sqrt(clamp01(weighted * clamp01(sourceTone)));
 }
 
 /** Small marks need optical weight and restrained motion to remain identifiable. */

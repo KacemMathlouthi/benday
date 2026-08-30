@@ -147,7 +147,7 @@ export interface RendererOptions {
   speed?: number;
   /** Dot color. `currentColor` resolves against the canvas. @default 'currentColor' */
   color?: string;
-  /** Dot diameter as a fraction of the grid cell. @default 0.62 */
+  /** Dot size against a full-coverage halftone dot; 1 lets solid ink paint solid. @default 0.62 */
   dotScale?: number;
   /** @default 'circle' */
   shape?: DotShape;

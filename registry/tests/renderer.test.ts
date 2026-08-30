@@ -2,6 +2,7 @@
 
 import { describe, expect, test } from "bun:test";
 
+import { devicePixelRatioCapped } from "../ui/benday/dom";
 import { createRenderer } from "../ui/benday/renderer";
 import type { DotMap, DotShape } from "../ui/benday/types";
 
@@ -110,10 +111,12 @@ const staticOptions = {
 };
 
 describe("registry renderer fidelity", () => {
-  test("represents coverage through area without fading the dot twice", () => {
+  // The halftone contract: painted area is the cell's own tone, so a dot of
+  // coverage v covers v of its cell. A ceiling below 1 is what painted black grey.
+  test.each([0.25, 0.5, 1])("paints area equal to coverage %p", (v) => {
     const { canvas, paints } = makeCanvas();
     const map = fullMap(1, 1);
-    map.dots[0] = { ...map.dots[0], d: 1, v: 0.25 };
+    map.dots[0] = { ...map.dots[0], d: 1, v };
 
     createRenderer(canvas, {
       ...staticOptions,
@@ -124,14 +127,15 @@ describe("registry renderer fidelity", () => {
     });
 
     expect(paints).toHaveLength(1);
-    expect(paints[0]?.radius).toBeCloseTo(25, 0);
+    const area = Math.PI * (paints[0]?.radius ?? 0) ** 2;
+    expect(area / 100 ** 2).toBeCloseTo(v, 2);
     expect(paints[0]?.alpha).toBe(1);
   });
 
-  test("keeps opaque source layers visibly distinct", () => {
+  test("scales painted area by the source layer's tone", () => {
     const { canvas, paints } = makeCanvas();
     const map = fullMap(2, 1);
-    map.dots[0] = { ...map.dots[0], t: 0 };
+    map.dots[0] = { ...map.dots[0], t: 0.25 };
     map.dots[1] = { ...map.dots[1], t: 1 };
 
     createRenderer(canvas, {
@@ -143,12 +147,11 @@ describe("registry renderer fidelity", () => {
     });
 
     expect(paints).toHaveLength(2);
-    expect(paints[1]?.radius ?? 0).toBeGreaterThan(
-      (paints[0]?.radius ?? 0) * 2
-    );
+    const ratio = (paints[0]?.radius ?? 0) ** 2 / (paints[1]?.radius ?? 1) ** 2;
+    expect(ratio).toBeCloseTo(0.25, 2);
   });
 
-  test("uses distance from the outline to create restrained tonal depth", () => {
+  test("leaves static area to the artwork's tones, not to depth", () => {
     const { canvas, paints } = makeCanvas();
     const map = fullMap(2, 1);
     map.dots[0] = { ...map.dots[0], d: 0, v: 0.5 };
@@ -163,19 +166,38 @@ describe("registry renderer fidelity", () => {
     });
 
     expect(paints).toHaveLength(2);
-    expect(paints[1]?.radius).toBeGreaterThan(paints[0]?.radius ?? 0);
+    expect(paints[1]?.radius).toBeCloseTo(paints[0]?.radius ?? 0, 6);
   });
 
-  test("consolidates an over-dense map at small CSS sizes", () => {
+  test("consolidates an over-dense map at small sizes", () => {
     const { canvas, paints } = makeCanvas();
 
     createRenderer(canvas, {
       ...staticOptions,
-      dotMap: fullMap(24, 24),
+      dotMap: fullMap(40, 40),
       size: 20,
     });
 
-    expect(paints).toHaveLength(10 * 10);
+    // 40 cells over 20px is finer than the backing store resolves; 20 is not.
+    expect(paints).toHaveLength(20 * 20);
+  });
+
+  test("splits a source cell across the target cells it straddles", () => {
+    const { canvas, paints } = makeCanvas();
+
+    // A hard edge at source column 12 of 25 lands at 10.56 on a 22-cell
+    // lattice. Handing each source cell whole to one bin snaps that edge to a
+    // boundary; splitting it by area keeps the half-covered cell.
+    const map = fullMap(25, 25);
+    map.dots = map.dots.filter((dot) => dot.col < 12);
+
+    createRenderer(canvas, { ...staticOptions, dotMap: map, size: 22 });
+
+    const max = Math.max(...paints.map((paint) => paint.radius));
+    const partial = paints.filter(
+      (paint) => paint.radius > max * 0.2 && paint.radius < max * 0.95
+    );
+    expect(partial.length).toBeGreaterThan(0);
   });
 
   test("keeps a small animated mark legible at the quietest preset frame", () => {
@@ -237,10 +259,10 @@ describe("registry renderer fidelity", () => {
       size: 20,
     });
 
-    // Consolidated to a coarser grid, and no denser than the 2px floor.
+    // Consolidated to a coarser grid, and no denser than the 2 device px floor.
     const cols = Math.sqrt(paints.length);
     expect(Number.isInteger(cols)).toBe(true);
-    expect(20 / cols).toBeGreaterThanOrEqual(2);
+    expect((20 / cols) * devicePixelRatioCapped()).toBeGreaterThanOrEqual(2);
   });
 
   test("uses the source aspect rather than the rounded grid ratio", () => {
