@@ -1,5 +1,17 @@
 # benday
 
+## 0.5.0
+
+### Minor Changes
+
+- 982a4bc: Read tone as contrast against the surface the artwork sits on, so mid shades keep the weight they have in the source.
+- d659b33: Paint dot area as the cell's own tone. Coverage, source tone and depth each entered through a floor before, so an empty cell painted 0.169 and a full one 0.319 and every logo arrived the same flat grey. `dotScale` is now measured against a full-coverage halftone dot; its default is unchanged, but the same value paints differently.
+- 4e8fb55: Measure the lattice floor in device pixels, so small marks keep their shape instead of collapsing to a handful of dots.
+
+### Patch Changes
+
+- b1a1f94: Resample the lattice by area when consolidating, so small marks lose the uneven beat their edges picked up.
+
 ## 0.4.0
 
 ### Minor Changes
